@@ -1,0 +1,16 @@
+{
+    "name": "valoquestionmark-bot",
+    "version": "1.0.0",
+    "main": "src/app.ts",
+    "repository": "https://github.com/stevenktruong/valoquestionmark-bot.git",
+    "author": "stevenktruong <steventruong@g.ucla.edu>",
+    "license": "MIT",
+    "dependencies": {
+        "discord.js": "^14.7.1"
+    },
+    "devDependencies": {
+        "eslint": "^8.32.0",
+        "prettier": "2.8.3",
+        "typescript": "^4.9.4"
+    }
+}
