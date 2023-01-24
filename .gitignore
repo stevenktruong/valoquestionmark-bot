@@ -1,1 +1,4 @@
 node_modules
+
+# Contains sensitive data (i.e., API token)
+.env
