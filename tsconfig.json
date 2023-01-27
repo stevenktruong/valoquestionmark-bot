@@ -6,7 +6,7 @@
         "target": "es6",
         "moduleResolution": "node"
     },
-    "ts-node": { "esm": true },
+    "ts-node": { "esm": true, "experimentalSpecifierResolution": "node" },
     "include": ["src/**/*"],
     "exclude": ["node_modules"]
 }
