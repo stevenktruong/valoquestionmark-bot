@@ -27,11 +27,11 @@ const commandsJson = commands.map(command => command.data.toJSON());
 
 (async () => {
     try {
-        console.log(`Attempting to refresh ${commandsJson.length} commands.`);
+        console.log(`Attempting to refresh ${commandsJson.length} command(s).`);
         const data = (await rest.put(Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID), {
             body: commandsJson,
         })) as RESTPutAPIApplicationGuildCommandsResult;
-        console.log(`Successfully reloaded ${data.length}`);
+        console.log(`Successfully reloaded ${data.length} command(s).`);
     } catch (error) {
         console.error(error);
     }

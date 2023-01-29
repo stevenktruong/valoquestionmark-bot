@@ -1,13 +1,10 @@
-import { ChatInputCommandInteraction, Collection, InteractionResponse, SlashCommandBuilder } from "discord.js";
+import { Collection } from "discord.js";
 
-import ping from "./ping";
+import { Command } from "types/ValoQuestionMarkClient";
 
-interface Command {
-    data: SlashCommandBuilder;
-    execute: (interaction: ChatInputCommandInteraction) => Promise<InteractionResponse<boolean>>;
-}
+import create from "./create";
 
 const commands = new Collection<string, Command>();
-commands.set("ping", ping);
+commands.set("create", create);
 
 export default commands;

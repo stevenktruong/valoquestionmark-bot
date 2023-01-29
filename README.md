@@ -21,3 +21,26 @@ SECRET=...
 | :------------ | :-------------------------------- |
 | `yarn start`  | Runs a local instance of the bot  |
 | `yarn deploy` | Deploy slash commands to a server |
+
+## Features
+
+-   `/create` create a customs lobby
+-   states
+    -   waiting (for people to join)
+        -   join button for everyone
+        -   ephemeral leave button
+    -   making teams (after getting 10)
+        -   select method
+            -   owner picks
+            -   draft
+            -   andy's algorithms
+    -   ready
+        -   start game/reset teams button
+    -   playing
+        -   finished
+-   owner only
+
+    -   reset teams
+    -   kick players
+
+-   map button to lobby via custom_id
