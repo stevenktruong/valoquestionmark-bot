@@ -31,20 +31,24 @@ export class PlayerManager {
         return this.players.size === MAX_LOBBY_SIZE;
     }
 
+    public hasPlayer(user: User): boolean {
+        return this.players.has(user.id);
+    }
+
     public addPlayer(user: User): void {
         if (this.players.has(user.id)) {
             console.warn(`${user.username} was added twice to the lobby`);
             return;
         }
         this.players.set(user.id, user);
-        this.teams[TeamLabel.NoTeam].set(user.id, user);
+        this.teams.get(TeamLabel.NoTeam).set(user.id, user);
     }
 
     public removePlayer(user: User): void {
         if (this.players.has(user.id)) this.players.delete(user.id);
         else console.warn(`Attempted to remove ${user.username} who was not in the lobby`);
 
-        if (!this.teams.every(team => team.delete(user.id)))
+        if (!this.teams.some(team => team.delete(user.id)))
             console.warn(`Team status of ${user.username} was inconsistent`);
     }
 

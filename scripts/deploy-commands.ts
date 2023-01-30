@@ -1,8 +1,7 @@
 import { REST, RESTPutAPIApplicationGuildCommandsResult, Routes } from "discord.js";
 
+import commands from "commands";
 import dotenv from "dotenv";
-
-import commands from "../src/commands";
 
 dotenv.config();
 const { DISCORD_TOKEN, CLIENT_ID, GUILD_ID } = process.env;

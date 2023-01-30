@@ -1,7 +1,7 @@
 import { ChannelType, ChatInputCommandInteraction, GuildTextBasedChannel, SlashCommandBuilder } from "discord.js";
 
-import { Lobby } from "../types/Lobby";
-import { ValoQuestionMarkClient } from "../types/ValoQuestionMarkClient";
+import { Lobby } from "types/Lobby";
+import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 
 const CHANNEL = "channel";
 
@@ -29,6 +29,6 @@ export default {
         }
 
         interaction.reply({ content: "Successfully created a lobby", ephemeral: true });
-        lobby.updateMessage();
+        lobby.update();
     },
 };

@@ -1,14 +1,14 @@
 import { Events } from "discord.js";
 
+import buttons from "buttons";
+import commands from "commands";
 import dotenv from "dotenv";
-
-import commands from "./commands";
-import { ValoQuestionMarkClient } from "./types/ValoQuestionMarkClient";
+import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 
 dotenv.config();
 const { DISCORD_TOKEN } = process.env;
 
-const client = new ValoQuestionMarkClient(commands);
+const client = new ValoQuestionMarkClient(commands, buttons);
 client.once(Events.ClientReady, c => {
     console.log(`Ready! Logged in as ${c.user.tag}`);
 });
