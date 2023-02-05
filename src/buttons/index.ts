@@ -1,4 +1,4 @@
-import { Collection, User } from "discord.js";
+import { Collection } from "discord.js";
 
 import { ButtonHandler } from "types/ValoQuestionMarkClient";
 
@@ -16,12 +16,6 @@ export enum ButtonType {
     ResetTeams = "ResetTeams",
     Finished = "Finished",
 }
-
-export const getButtonId = (user: User, buttonType: ButtonType) => `${user.id}-${buttonType}`;
-export const parseButtonId = (customId: string) => ({
-    ownerId: customId.split("-")[0],
-    buttonType: customId.split("-")[1] as ButtonType,
-});
 
 const buttons = new Collection<ButtonType, ButtonHandler>();
 buttons.set(ButtonType.Join, handleJoin);

@@ -4,8 +4,8 @@ import {
     GatewayIntentBits,
     Snowflake,
     Collection,
-    User,
     ButtonInteraction,
+    GuildMember,
 } from "discord.js";
 
 import { ButtonType } from "buttons";
@@ -24,9 +24,9 @@ export class ValoQuestionMarkClient extends Client {
     public commands: Collection<string, Command>;
     public buttonHandlers: Collection<ButtonType, ButtonHandler>;
     public lobbies: Collection<Snowflake, Lobby>;
-    public newLobby(user: User, lobby: Lobby): boolean {
-        if (this.lobbies.has(user.id)) return false;
-        this.lobbies.set(user.id, lobby);
+    public newLobby(member: GuildMember, lobby: Lobby): boolean {
+        if (this.lobbies.has(member.id)) return false;
+        this.lobbies.set(member.id, lobby);
         return true;
     }
 }

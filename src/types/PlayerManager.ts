@@ -1,4 +1,4 @@
-import { Collection, Snowflake, User } from "discord.js";
+import { Collection, Snowflake, GuildMember } from "discord.js";
 
 import { MAX_LOBBY_SIZE, MAX_TEAM_SIZE } from "./Lobby";
 
@@ -8,76 +8,90 @@ export enum TeamLabel {
     TeamB = "TeamB",
 }
 
-type UserCollection = Collection<Snowflake, User>;
+type GuildMemberCollection = Collection<Snowflake, GuildMember>;
 
-export interface Team {
-    captain?: User;
-    players: UserCollection;
+export class Team {
+    public constructor() {
+        this.captain = null;
+        this.players = new Collection();
+    }
+
+    captain?: GuildMember;
+    players: GuildMemberCollection;
 }
 
 export class PlayerManager {
-    public constructor(players: UserCollection) {
+    public constructor(players: GuildMemberCollection) {
         this.players = players;
         this.teams = new Collection();
-        this.teams.set(TeamLabel.NoTeam, new Collection());
-        this.teams.set(TeamLabel.TeamA, new Collection());
-        this.teams.set(TeamLabel.TeamB, new Collection());
+        this.teams.set(TeamLabel.NoTeam, new Team());
+        this.teams.set(TeamLabel.TeamA, new Team());
+        this.teams.set(TeamLabel.TeamB, new Team());
     }
 
-    public players: UserCollection;
-    private teams: Collection<TeamLabel, UserCollection>;
+    public readonly players: GuildMemberCollection;
+    public readonly teams: Collection<TeamLabel, Team>;
+
+    public getTeams() {
+        return {
+            teamA: this.teams.get(TeamLabel.TeamA),
+            teamB: this.teams.get(TeamLabel.TeamB),
+            noTeam: this.teams.get(TeamLabel.NoTeam),
+        };
+    }
 
     public isFull(): boolean {
         return this.players.size === MAX_LOBBY_SIZE;
     }
 
-    public hasPlayer(user: User): boolean {
-        return this.players.has(user.id);
+    public hasPlayer(member: GuildMember): boolean {
+        return this.players.has(member.id);
     }
 
-    public addPlayer(user: User): void {
-        if (this.players.has(user.id)) {
-            console.warn(`${user.username} was added twice to the lobby`);
+    public addPlayer(member: GuildMember): void {
+        if (this.players.has(member.id)) {
+            console.warn(`${member.displayName} was added twice to the lobby`);
             return;
         }
-        this.players.set(user.id, user);
-        this.teams.get(TeamLabel.NoTeam).set(user.id, user);
+        this.players.set(member.id, member);
+        this.teams.get(TeamLabel.NoTeam).players.set(member.id, member);
     }
 
-    public removePlayer(user: User): void {
-        if (this.players.has(user.id)) this.players.delete(user.id);
-        else console.warn(`Attempted to remove ${user.username} who was not in the lobby`);
+    public removePlayer(member: GuildMember): void {
+        if (this.players.has(member.id)) this.players.delete(member.id);
+        else console.warn(`Attempted to remove ${member.displayName} who was not in the lobby`);
 
-        if (!this.teams.some(team => team.delete(user.id)))
-            console.warn(`Team status of ${user.username} was inconsistent`);
+        if (!this.teams.some(team => team.players.delete(member.id)))
+            console.warn(`Team status of ${member.displayName} was inconsistent`);
     }
 
-    public moveToTeam(user: User, teamLabel: TeamLabel): void {
-        if (!this.players.has(user.id)) {
-            console.warn(`Tried to move non-existent user ${user.username}`);
-            return;
-        }
-
-        if (this.teams.get(teamLabel).size === MAX_TEAM_SIZE) {
-            console.warn(`Tried to move user ${user.username} to a full team`);
+    public moveToTeam(member: GuildMember, teamLabel: TeamLabel): void {
+        if (!this.players.has(member.id)) {
+            console.warn(`Tried to move non-existent user ${member.displayName}`);
             return;
         }
 
-        this.teams.forEach(team => team.delete(user.id));
-        this.teams.get(teamLabel).set(user.id, user);
+        if (this.teams.get(teamLabel).players.size === MAX_TEAM_SIZE) {
+            console.warn(`Tried to move user ${member.displayName} to a full team`);
+            return;
+        }
+
+        this.teams.forEach(team => team.players.delete(member.id));
+        this.teams.get(teamLabel).players.set(member.id, member);
     }
 
-    public teamOf(player: User): TeamLabel | null {
+    public teamOf(player: GuildMember): TeamLabel | null {
         if (!this.players.has(player.id)) return null;
         for (const teamLabel in TeamLabel) {
-            this.teams.get(TeamLabel[teamLabel] as TeamLabel).has(player.id);
-            return teamLabel as TeamLabel;
+            if (this.teams.get(TeamLabel[teamLabel] as TeamLabel).players.has(player.id)) {
+                return teamLabel as TeamLabel;
+            }
         }
     }
 
     public resetTeams(): void {
-        this.players.forEach(user => this.teams.get(TeamLabel.NoTeam).set(user.id, user));
-        this.teams.set(TeamLabel.TeamA, new Collection());
-        this.teams.set(TeamLabel.TeamB, new Collection());
+        this.players.forEach(member => this.teams.get(TeamLabel.NoTeam).players.set(member.id, member));
+        this.teams.set(TeamLabel.TeamA, new Team());
+        this.teams.set(TeamLabel.TeamB, new Team());
     }
 }

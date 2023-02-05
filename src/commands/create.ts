@@ -1,4 +1,10 @@
-import { ChannelType, ChatInputCommandInteraction, GuildTextBasedChannel, SlashCommandBuilder } from "discord.js";
+import {
+    ChannelType,
+    ChatInputCommandInteraction,
+    GuildMember,
+    GuildTextBasedChannel,
+    SlashCommandBuilder,
+} from "discord.js";
 
 import { Lobby } from "types/Lobby";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
@@ -14,21 +20,27 @@ export default {
                 .setName(CHANNEL)
                 .setDescription("The channel to host the lobby in")
                 .addChannelTypes(ChannelType.GuildText)
-                .setRequired(true)
         ),
     execute: async (interaction: ChatInputCommandInteraction) => {
         const client: ValoQuestionMarkClient = interaction.client as ValoQuestionMarkClient;
-        const channelId = interaction.options.getChannel(CHANNEL).id;
+        const guild = interaction.guild;
+        const member = interaction.member as GuildMember;
+        const channelId = interaction.options.getChannel(CHANNEL)
+            ? interaction.options.getChannel(CHANNEL).id
+            : interaction.channelId;
         const channel = (await interaction.guild.channels.fetch(channelId)) as GuildTextBasedChannel;
 
-        const lobby = new Lobby(interaction.user, channel);
+        const lobby = new Lobby(member, guild, channel);
 
-        if (!client.newLobby(interaction.user, lobby)) {
+        if (!client.newLobby(member, lobby)) {
             interaction.reply({ content: "You already created a lobby", ephemeral: true });
             return;
         }
 
-        interaction.reply({ content: "Successfully created a lobby", ephemeral: true });
-        lobby.update();
+        interaction.reply({
+            content: "Successfully created a lobby! Once everyone joins, run `/balance` to pick teams.",
+            ephemeral: true,
+        });
+        await lobby.update();
     },
 };

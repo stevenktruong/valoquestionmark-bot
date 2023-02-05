@@ -14,7 +14,7 @@ export default {
             });
             return;
         }
-        lobby.update();
         interaction.reply({ content: "Refreshed your lobby", ephemeral: true });
+        await lobby.update();
     },
 };

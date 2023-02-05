@@ -1,15 +1,17 @@
 import {
-    ActionRowBuilder,
-    ButtonBuilder,
-    ButtonStyle,
     Collection,
     EmbedBuilder,
     GuildTextBasedChannel,
     Message,
-    User,
+    GuildMember,
+    Guild,
+    ChannelType,
+    CategoryChannel,
+    VoiceChannel,
+    Snowflake,
 } from "discord.js";
 
-import { ButtonType, getButtonId, parseButtonId } from "buttons";
+import { parseButtonId, getLobbyButtons } from "components/lobbyButtons";
 import { PlayerManager } from "types/PlayerManager";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 
@@ -17,51 +19,109 @@ export const MAX_LOBBY_SIZE = 10;
 export const MAX_TEAM_SIZE = 5;
 
 export enum LobbyState {
-    Waiting = "Waiting", // Waiting for players to join
-    Full = "Full", // Full lobby without teams made
+    Waiting = "Waiting", // After teams have been made
 
     OwnerPicking = "OwnerPicking", // Lobby owner picks manually
 
     PickingCaptains = "PickingCaptains", // Pick team captains for draft
     Drafting = "Drafting", // Team captains pick
 
-    Ready = "Ready", // After teams have been made
     Playing = "Playing", // Game has started
 }
 
 export class Lobby {
-    public constructor(owner: User, channel: GuildTextBasedChannel) {
+    public constructor(owner: GuildMember, guild: Guild, channel: GuildTextBasedChannel) {
         this.state = LobbyState.Waiting;
+        this.channelIds = [];
         this.owner = owner;
+        this.guild = guild;
         this.channel = channel;
         this.playerManager = new PlayerManager(new Collection());
     }
 
     public state: LobbyState;
-    public owner: User;
-    public channel: GuildTextBasedChannel;
-    public playerManager: PlayerManager;
+    public channelIds: Snowflake[];
+    public readonly owner: GuildMember;
+    public readonly guild: Guild;
+    public readonly channel: GuildTextBasedChannel;
+    public readonly playerManager: PlayerManager;
 
+    // Main message representing the lobby status
     private _message: Message;
 
-    public async update() {
-        const embed = new EmbedBuilder()
-            .setColor(0x0099ff)
-            .setTitle(`${this.owner.username}'s Customs Lobby`)
-            .setAuthor({
-                name: `${this.owner.username}`,
-                iconURL: this.owner.avatarURL(),
+    // Channels created for the lobby
+    private _category: CategoryChannel;
+    private _channelA: VoiceChannel;
+    private _channelB: VoiceChannel;
+
+    public async start() {
+        const { teamA, teamB } = this.playerManager.getTeams();
+
+        this._category = await this.guild.channels.create({
+            name: `${this.owner.displayName}'s Customs`,
+            type: ChannelType.GuildCategory,
+        });
+        this._channelA = await this._category.children.create({ name: "attackers", type: ChannelType.GuildVoice });
+        this._channelB = await this._category.children.create({ name: "defenders", type: ChannelType.GuildVoice });
+
+        this.channelIds = [this._category.id, this._channelA.id, this._channelB.id];
+
+        teamA.players.forEach(member => {
+            if (member.voice && member.voice.channel) member.voice.setChannel(this._channelA);
+        });
+
+        teamB.players.forEach(member => {
+            if (member.voice && member.voice.channel) member.voice.setChannel(this._channelB);
+        });
+
+        this.state = LobbyState.Playing;
+    }
+
+    public async stop(channel: VoiceChannel) {
+        await Promise.all(
+            this.playerManager.players.map(member => {
+                if (member.voice && member.voice.channel) return member.voice.setChannel(channel);
             })
-            .setDescription("Click Join to join the lobby")
+        );
+
+        if (this._channelB) await this._channelB.delete();
+        if (this._channelA) await this._channelA.delete();
+        if (this._category) await this._category.delete();
+
+        this.channelIds = [];
+
+        this.state = LobbyState.Waiting;
+    }
+
+    public async update() {
+        const { teamA, teamB } = this.playerManager.getTeams();
+
+        const embed = new EmbedBuilder()
+            .setColor(this.state !== LobbyState.Playing ? "Blue" : "Green")
+            .setTitle(`${this.owner.displayName}'s Customs Lobby`)
+            .setAuthor({
+                name: `${this.owner.displayName}`,
+                iconURL: this.owner.displayAvatarURL(),
+            })
+            .setDescription(this.state !== LobbyState.Playing ? "Click Join to join the lobby" : "Lobby is in progress")
             .addFields(
-                { name: "Inline field title", value: "Some value here", inline: true },
-                { name: "Inline field title", value: "Some value here", inline: true },
-                { name: "\u200B", value: "\u200B" },
+                {
+                    name: "Attackers",
+                    value:
+                        teamA.players.size > 0 ? teamA.players.map(member => member.displayName).join("\n") : "\u200b",
+                    inline: true,
+                },
+                {
+                    name: "Defenders",
+                    value:
+                        teamB.players.size > 0 ? teamB.players.map(member => member.displayName).join("\n") : "\u200b",
+                    inline: true,
+                },
                 {
                     name: "Players",
                     value:
                         this.playerManager.players.size > 0
-                            ? this.playerManager.players.map(user => user.username).join("\n")
+                            ? this.playerManager.players.map(member => member.displayName).join("\n")
                             : "\u200b",
                 }
             )
@@ -70,19 +130,7 @@ export class Lobby {
         if (this._message) {
             this._message.edit({ embeds: [embed] });
         } else {
-            const lobbyButtons = new ActionRowBuilder<ButtonBuilder>()
-                .addComponents(
-                    new ButtonBuilder()
-                        .setCustomId(getButtonId(this.owner, ButtonType.Join))
-                        .setLabel("Join lobby")
-                        .setStyle(ButtonStyle.Primary)
-                )
-                .addComponents(
-                    new ButtonBuilder()
-                        .setCustomId(getButtonId(this.owner, ButtonType.Leave))
-                        .setLabel("Leave lobby")
-                        .setStyle(ButtonStyle.Danger)
-                );
+            const lobbyButtons = getLobbyButtons(this);
 
             this._message = await this.channel.send({
                 embeds: [embed],
@@ -111,7 +159,7 @@ export class Lobby {
                     await i.reply({ content: "There was an error while handling this button!", ephemeral: true });
                 }
 
-                lobby.update();
+                await lobby.update();
             });
         }
     }
