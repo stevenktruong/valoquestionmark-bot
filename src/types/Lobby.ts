@@ -87,11 +87,7 @@ export class Lobby {
 
     public async stop(channel: VoiceChannel) {
         try {
-            await Promise.all(
-                this.playerManager.players
-                    .filter(member => member.voice)
-                    .map(member => member.voice.setChannel(channel))
-            );
+            await Promise.all(this._category.members.map(member => member.voice.setChannel(channel)));
         } catch (error) {
             // Ignore errors when moving players since we don't care if it succeeds or not
         }

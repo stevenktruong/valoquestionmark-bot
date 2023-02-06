@@ -23,7 +23,7 @@ export default {
         }
 
         await lobby.destroy();
-        client.lobbies.delete(lobby.owner.id);
+        client.lobbies.delete(interaction.user.id);
 
         await interaction.reply({
             content: "Successfully deleted your lobby. Run `/create` again to create a new one.",

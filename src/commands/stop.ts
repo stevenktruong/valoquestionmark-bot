@@ -45,7 +45,7 @@ export default {
                 }
 
                 if (!channel.isVoiceBased()) {
-                    console.error(`Channel ${channel.name} isn't a void channel`);
+                    console.error(`Channel ${channel.name} isn't a voice channel`);
                     return;
                 }
 
