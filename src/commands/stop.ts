@@ -25,6 +25,7 @@ export default {
         const message = await interaction.reply({
             content: "Select the voice channel to move everyone to:",
             components: [getChannelSelector(lobby)],
+            ephemeral: true,
         });
 
         await message

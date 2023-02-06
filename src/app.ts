@@ -13,6 +13,12 @@ client.once(Events.ClientReady, c => {
     console.log(`Ready! Logged in as ${c.user.tag}`);
 });
 
+process.on("SIGTERM", async () => {
+    await client.cleanup();
+    console.log("Successfully cleaned up");
+    process.exit();
+});
+
 // Handle commands
 client.on(Events.InteractionCreate, async interaction => {
     if (!interaction.isChatInputCommand()) return;

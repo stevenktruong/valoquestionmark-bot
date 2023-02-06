@@ -24,10 +24,15 @@ export class ValoQuestionMarkClient extends Client {
     public commands: Collection<string, Command>;
     public buttonHandlers: Collection<ButtonType, ButtonHandler>;
     public lobbies: Collection<Snowflake, Lobby>;
+
     public newLobby(member: GuildMember, lobby: Lobby): boolean {
         if (this.lobbies.has(member.id)) return false;
         this.lobbies.set(member.id, lobby);
         return true;
+    }
+
+    public async cleanup() {
+        await Promise.all(this.lobbies.map(lobby => lobby.destroy()));
     }
 }
 

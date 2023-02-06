@@ -1,6 +1,7 @@
-import { ButtonInteraction, GuildMember } from "discord.js";
+import { ButtonInteraction, GuildMember, Snowflake } from "discord.js";
 
 import { parseButtonId } from "components/lobbyButtons";
+import { discordIdToPlayer, Player } from "players";
 import { MAX_LOBBY_SIZE } from "types/Lobby";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 
@@ -10,10 +11,16 @@ export const handleJoin = async (interaction: ButtonInteraction) => {
     const lobby = client.lobbies.get(ownerId);
 
     const member = interaction.member as GuildMember;
-    const dummies = [];
-    for (let i = 1; i < 10; i++) {
-        dummies.push({ ...member, id: `${i}`, displayName: `dummy-${i}` } as GuildMember);
-    }
+    const dummies = Object.entries(discordIdToPlayer)
+        .slice(0, 9)
+        .map(
+            ([id, player]) =>
+                ({
+                    ...member,
+                    id: id,
+                    displayName: player,
+                } as GuildMember)
+        );
 
     if (!lobby.playerManager.hasPlayer(member)) {
         if (lobby.playerManager.players.size === MAX_LOBBY_SIZE) {

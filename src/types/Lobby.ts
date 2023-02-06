@@ -54,6 +54,12 @@ export class Lobby {
     private _channelA: VoiceChannel;
     private _channelB: VoiceChannel;
 
+    public async destroy() {
+        if (this._channelB) await this._channelB.delete();
+        if (this._channelA) await this._channelA.delete();
+        if (this._category) await this._category.delete();
+    }
+
     public async start() {
         const { teamA, teamB } = this.playerManager.getTeams();
 
@@ -66,27 +72,36 @@ export class Lobby {
 
         this.channelIds = [this._category.id, this._channelA.id, this._channelB.id];
 
-        teamA.players.forEach(member => {
-            if (member.voice && member.voice.channel) member.voice.setChannel(this._channelA);
-        });
-
-        teamB.players.forEach(member => {
-            if (member.voice && member.voice.channel) member.voice.setChannel(this._channelB);
-        });
+        try {
+            await Promise.all([
+                ...teamA.players.filter(member => member.voice).map(member => member.voice.setChannel(this._channelA)),
+                ...teamB.players.filter(member => member.voice).map(member => member.voice.setChannel(this._channelB)),
+            ]);
+        } catch (error) {
+            // Ignore errors when moving players since we don't care if it succeeds or not
+        }
 
         this.state = LobbyState.Playing;
     }
 
     public async stop(channel: VoiceChannel) {
-        await Promise.all(
-            this.playerManager.players.map(member => {
-                if (member.voice && member.voice.channel) return member.voice.setChannel(channel);
-            })
-        );
+        try {
+            await Promise.all(
+                this.playerManager.players
+                    .filter(member => member.voice)
+                    .map(member => member.voice.setChannel(channel))
+            );
+        } catch (error) {
+            // Ignore errors when moving players since we don't care if it succeeds or not
+        }
 
         if (this._channelB) await this._channelB.delete();
         if (this._channelA) await this._channelA.delete();
         if (this._category) await this._category.delete();
+
+        this._channelB = null;
+        this._channelA = null;
+        this._category = null;
 
         this.channelIds = [];
 
@@ -98,6 +113,9 @@ export class Lobby {
 
         const embed = new EmbedBuilder()
             .setColor(this.state !== LobbyState.Playing ? "Blue" : "Green")
+            .setThumbnail(
+                "https://raw.githubusercontent.com/candysan7/valorant-customs-stats/main/home-page/logo-v3.png"
+            )
             .setTitle(`${this.owner.displayName}'s Customs Lobby`)
             .setAuthor({
                 name: `${this.owner.displayName}`,
