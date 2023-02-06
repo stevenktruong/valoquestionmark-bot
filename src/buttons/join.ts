@@ -1,7 +1,7 @@
 import { ButtonInteraction, GuildMember, Snowflake } from "discord.js";
 
 import { parseButtonId } from "components/lobbyButtons";
-import { discordIdToPlayer, Player } from "players";
+import { discordIdToPlayer } from "players";
 import { MAX_LOBBY_SIZE } from "types/Lobby";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 
@@ -33,5 +33,5 @@ export const handleJoin = async (interaction: ButtonInteraction) => {
         }
         lobby.playerManager.addPlayer(member);
     }
-    interaction.deferUpdate();
+    await interaction.deferUpdate();
 };

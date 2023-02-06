@@ -8,13 +8,13 @@ export default {
         const client: ValoQuestionMarkClient = interaction.client as ValoQuestionMarkClient;
         const lobby = client.lobbies.get(interaction.user.id);
         if (!lobby) {
-            interaction.reply({
+            await interaction.reply({
                 content: "You don't have a customs lobby",
                 ephemeral: true,
             });
             return;
         }
-        interaction.reply({ content: "Refreshed your lobby", ephemeral: true });
+        await interaction.reply({ content: "Refreshed your lobby", ephemeral: true });
         await lobby.update();
     },
 };

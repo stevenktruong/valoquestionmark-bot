@@ -33,11 +33,11 @@ export default {
         const lobby = new Lobby(member, guild, channel);
 
         if (!client.newLobby(member, lobby)) {
-            interaction.reply({ content: "You already created a lobby", ephemeral: true });
+            await interaction.reply({ content: "You already created a lobby", ephemeral: true });
             return;
         }
 
-        interaction.reply({
+        await interaction.reply({
             content: "Successfully created a lobby! Once everyone joins, run `/balance` to pick teams.",
             ephemeral: true,
         });

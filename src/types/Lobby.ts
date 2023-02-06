@@ -55,6 +55,7 @@ export class Lobby {
     private _channelB: VoiceChannel;
 
     public async destroy() {
+        if (this._message) await this._message.delete();
         if (this._channelB) await this._channelB.delete();
         if (this._channelA) await this._channelA.delete();
         if (this._category) await this._category.delete();
