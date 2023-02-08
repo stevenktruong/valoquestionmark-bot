@@ -1,6 +1,7 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder, Snowflake } from "discord.js";
+import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
 
 import { BalanceStrategy } from "balance";
+import { noLobby } from "errors";
 import { LobbyState } from "types/Lobby";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 
@@ -30,13 +31,7 @@ export default {
         const client: ValoQuestionMarkClient = interaction.client as ValoQuestionMarkClient;
         const lobby = client.lobbies.get(interaction.user.id);
         const balanceStrategy = interaction.options.getString(STRATEGY) as BalanceStrategy;
-        if (!lobby) {
-            await interaction.reply({
-                content: "You don't have a customs lobby",
-                ephemeral: true,
-            });
-            return;
-        }
+        if (!lobby) return await noLobby(interaction);
 
         if (lobby.size == 0) {
             await interaction.reply({

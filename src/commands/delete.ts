@@ -1,5 +1,6 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
 
+import { noLobby } from "errors";
 import { LobbyState } from "types/Lobby";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 
@@ -8,11 +9,7 @@ export default {
     execute: async (interaction: ChatInputCommandInteraction) => {
         const client: ValoQuestionMarkClient = interaction.client as ValoQuestionMarkClient;
         const lobby = client.lobbies.get(interaction.user.id);
-
-        if (!lobby) {
-            await interaction.reply({ content: "You don't have a customs lobby", ephemeral: true });
-            return;
-        }
+        if (!lobby) return await noLobby(interaction);
 
         if (lobby.state === LobbyState.Playing) {
             await interaction.reply({

@@ -4,7 +4,7 @@ import { getChannelSelector, getChannelSelectorId } from "components/channelSele
 import { LobbyState } from "types/Lobby";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 
-const CHANNEL = "channel";
+// const CHANNEL = "channel";
 
 export default {
     data: new SlashCommandBuilder().setName("stop").setDescription("Move everyone back to one channel"),

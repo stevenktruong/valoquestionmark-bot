@@ -9,7 +9,8 @@
         "module": "CommonJS",
         "target": "ES6",
         "sourceMap": true,
-        "outDir": "dist"
+        "outDir": "dist",
+        "noUnusedLocals": true
     },
     "ts-node": {
         "esm": true,

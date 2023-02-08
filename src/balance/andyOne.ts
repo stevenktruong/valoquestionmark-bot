@@ -2,7 +2,6 @@ import { ChatInputCommandInteraction } from "discord.js";
 
 import { spawn } from "child_process";
 import { getIdFromPlayer, getPlayerFromId } from "players";
-import { Team, TeamLabel } from "types/Lobby";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 
 const pythonPath = "./src/algorithms/env/bin/python";

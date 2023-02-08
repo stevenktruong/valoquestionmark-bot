@@ -1,8 +1,8 @@
-import { ButtonInteraction, GuildMember, Snowflake } from "discord.js";
+import { ButtonInteraction, GuildMember } from "discord.js";
 
 import { parseButtonId } from "components/lobbyButtons";
 import { discordIdToPlayer } from "players";
-import { LobbyState, MAX_LOBBY_SIZE } from "types/Lobby";
+import { MAX_LOBBY_SIZE } from "types/Lobby";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 
 export const handleJoin = async (interaction: ButtonInteraction) => {
