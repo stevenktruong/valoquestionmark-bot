@@ -1,9 +1,7 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, Snowflake } from "discord.js";
 
 import { BalanceStrategy } from "balance";
-import { getTeamSelector, getTeamSelectorId } from "components/teamSelector";
 import { LobbyState } from "types/Lobby";
-import { TeamLabel } from "types/PlayerManager";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 
 const STRATEGY = "strategy";
@@ -40,7 +38,7 @@ export default {
             return;
         }
 
-        if (lobby.playerManager.players.size == 0) {
+        if (lobby.players.size == 0) {
             await interaction.reply({
                 content: "Your lobby doesn't have any players",
                 ephemeral: true,
@@ -48,7 +46,7 @@ export default {
             return;
         }
 
-        if (lobby.state !== LobbyState.Waiting) {
+        if (lobby.state === LobbyState.Playing) {
             await interaction.reply({
                 content: "You can't balance teams while a game is in progress",
                 ephemeral: true,
@@ -59,6 +57,7 @@ export default {
         const handler = client.balanceStrategies.get(balanceStrategy);
         try {
             handler(interaction);
+            lobby.state = LobbyState.Balanced;
         } catch (error) {
             console.error(error);
             await interaction.reply({

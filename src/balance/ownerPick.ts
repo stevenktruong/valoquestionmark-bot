@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction } from "discord.js";
 
 import { getTeamSelector, getTeamSelectorId } from "components/teamSelector";
-import { TeamLabel } from "types/PlayerManager";
+import { TeamLabel } from "types/Lobby";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 
 export const handleOwnerPick = async (interaction: ChatInputCommandInteraction) => {
@@ -19,13 +19,13 @@ export const handleOwnerPick = async (interaction: ChatInputCommandInteraction) 
             return;
         }
 
-        lobby.playerManager.resetTeams();
+        lobby.resetTeams();
         const selection = i.values;
-        lobby.playerManager.players.forEach((member, id) => {
+        lobby.players.forEach((member, id) => {
             if (selection.includes(id)) {
-                lobby.playerManager.moveToTeam(member, TeamLabel.TeamA);
+                lobby.moveToTeam(member, TeamLabel.TeamA);
             } else {
-                lobby.playerManager.moveToTeam(member, TeamLabel.TeamB);
+                lobby.moveToTeam(member, TeamLabel.TeamB);
             }
         });
 

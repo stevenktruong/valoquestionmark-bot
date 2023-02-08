@@ -2,7 +2,7 @@ import { ButtonInteraction, GuildMember, Snowflake } from "discord.js";
 
 import { parseButtonId } from "components/lobbyButtons";
 import { discordIdToPlayer } from "players";
-import { MAX_LOBBY_SIZE } from "types/Lobby";
+import { LobbyState, MAX_LOBBY_SIZE } from "types/Lobby";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 
 export const handleJoin = async (interaction: ButtonInteraction) => {
@@ -22,16 +22,16 @@ export const handleJoin = async (interaction: ButtonInteraction) => {
                 } as GuildMember)
         );
 
-    if (!lobby.playerManager.hasPlayer(member)) {
-        if (lobby.playerManager.players.size === MAX_LOBBY_SIZE) {
+    if (!lobby.hasPlayer(member)) {
+        if (lobby.players.size === MAX_LOBBY_SIZE) {
             await interaction.reply({ content: "This lobby is full", ephemeral: true });
             return;
         }
 
         for (const dummy of dummies) {
-            lobby.playerManager.addPlayer(dummy);
+            lobby.addPlayer(dummy);
         }
-        lobby.playerManager.addPlayer(member);
+        lobby.addPlayer(member);
     }
     await interaction.deferUpdate();
 };

@@ -1,6 +1,7 @@
 import { ButtonInteraction, GuildMember } from "discord.js";
 
 import { parseButtonId } from "components/lobbyButtons";
+import { LobbyState } from "types/Lobby";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 
 export const handleLeave = async (interaction: ButtonInteraction) => {
@@ -9,8 +10,8 @@ export const handleLeave = async (interaction: ButtonInteraction) => {
     const { ownerId } = parseButtonId(interaction.customId);
     const lobby = client.lobbies.get(ownerId);
 
-    if (lobby.playerManager.hasPlayer(member)) {
-        lobby.playerManager.removePlayer(member);
+    if (lobby.hasPlayer(member)) {
+        lobby.removePlayer(member);
     }
     await interaction.deferUpdate();
 };

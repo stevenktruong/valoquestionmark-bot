@@ -14,6 +14,11 @@ import { ButtonType } from "buttons";
 import { Lobby } from "./Lobby";
 
 export class ValoQuestionMarkClient extends Client {
+    public commands: Collection<string, Command>;
+    public buttons: Collection<ButtonType, ButtonHandler>;
+    public balanceStrategies: Collection<BalanceStrategy, BalanceStrategyHandler>;
+    public lobbies: Collection<Snowflake, Lobby>;
+
     public constructor(
         commands: Collection<string, Command>,
         buttons: Collection<ButtonType, ButtonHandler>,
@@ -26,11 +31,6 @@ export class ValoQuestionMarkClient extends Client {
         this.balanceStrategies = balanceStrategies;
         this.lobbies = new Collection();
     }
-
-    public commands: Collection<string, Command>;
-    public buttons: Collection<ButtonType, ButtonHandler>;
-    public balanceStrategies: Collection<BalanceStrategy, BalanceStrategyHandler>;
-    public lobbies: Collection<Snowflake, Lobby>;
 
     public newLobby(member: GuildMember, lobby: Lobby): boolean {
         if (this.lobbies.has(member.id)) return false;

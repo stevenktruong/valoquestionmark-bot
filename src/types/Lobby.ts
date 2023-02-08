@@ -1,6 +1,5 @@
 import {
     Collection,
-    EmbedBuilder,
     GuildTextBasedChannel,
     Message,
     GuildMember,
@@ -12,14 +11,15 @@ import {
 } from "discord.js";
 
 import { parseButtonId, getLobbyButtons } from "components/lobbyButtons";
-import { PlayerManager } from "types/PlayerManager";
+import { getLobbyStatus } from "embeds/lobbyStatus";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 
 export const MAX_LOBBY_SIZE = 10;
 export const MAX_TEAM_SIZE = 5;
 
 export enum LobbyState {
-    Waiting = "Waiting", // After teams have been made
+    Waiting = "Waiting", // Before teams have been made
+    Balanced = "Balanced", // After teams have been made
 
     OwnerPicking = "OwnerPicking", // Lobby owner picks manually
 
@@ -29,22 +29,32 @@ export enum LobbyState {
     Playing = "Playing", // Game has started
 }
 
-export class Lobby {
-    public constructor(owner: GuildMember, guild: Guild, channel: GuildTextBasedChannel) {
-        this.state = LobbyState.Waiting;
-        this.channelIds = [];
-        this.owner = owner;
-        this.guild = guild;
-        this.channel = channel;
-        this.playerManager = new PlayerManager(new Collection());
+export enum TeamLabel {
+    NoTeam = "NoTeam",
+    TeamA = "TeamA",
+    TeamB = "TeamB",
+}
+
+type GuildMemberCollection = Collection<Snowflake, GuildMember>;
+
+export class Team {
+    public constructor() {
+        this.captain = null;
+        this.players = new Collection();
     }
 
+    captain?: GuildMember;
+    players: GuildMemberCollection;
+}
+
+export class Lobby {
     public state: LobbyState;
     public channelIds: Snowflake[];
     public readonly owner: GuildMember;
     public readonly guild: Guild;
     public readonly channel: GuildTextBasedChannel;
-    public readonly playerManager: PlayerManager;
+    public readonly players: GuildMemberCollection;
+    public readonly teams: Collection<TeamLabel, Team>;
 
     // Main message representing the lobby status
     private _message: Message;
@@ -54,6 +64,20 @@ export class Lobby {
     private _channelA: VoiceChannel;
     private _channelB: VoiceChannel;
 
+    public constructor(owner: GuildMember, guild: Guild, channel: GuildTextBasedChannel) {
+        this.state = LobbyState.Waiting;
+        this.channelIds = [];
+        this.owner = owner;
+        this.guild = guild;
+        this.channel = channel;
+        this.players = new Collection();
+        this.teams = new Collection([
+            [TeamLabel.NoTeam, new Team()],
+            [TeamLabel.TeamA, new Team()],
+            [TeamLabel.TeamB, new Team()],
+        ]);
+    }
+
     public async destroy() {
         if (this._message) await this._message.delete();
         if (this._channelB) await this._channelB.delete();
@@ -62,7 +86,7 @@ export class Lobby {
     }
 
     public async start() {
-        const { teamA, teamB } = this.playerManager.getTeams();
+        const { teamA, teamB } = this.getTeams();
 
         this._category = await this.guild.channels.create({
             name: `${this.owner.displayName}'s Customs`,
@@ -106,54 +130,23 @@ export class Lobby {
     }
 
     public async update() {
-        const { teamA, teamB } = this.playerManager.getTeams();
+        const { teamA, teamB } = this.getTeams();
 
-        const embed = new EmbedBuilder()
-            .setColor(this.state !== LobbyState.Playing ? "Blue" : "Green")
-            .setThumbnail(
-                "https://raw.githubusercontent.com/candysan7/valorant-customs-stats/main/home-page/logo-v3.png"
-            )
-            .setTitle(`${this.owner.displayName}'s Customs Lobby`)
-            .setAuthor({
-                name: `${this.owner.displayName}`,
-                iconURL: this.owner.displayAvatarURL(),
-            })
-            .setDescription(this.state !== LobbyState.Playing ? "Click Join to join the lobby" : "Lobby is in progress")
-            .addFields(
-                {
-                    name: "Attackers",
-                    value:
-                        teamA.players.size > 0 ? teamA.players.map(member => member.displayName).join("\n") : "\u200b",
-                    inline: true,
-                },
-                {
-                    name: "Defenders",
-                    value:
-                        teamB.players.size > 0 ? teamB.players.map(member => member.displayName).join("\n") : "\u200b",
-                    inline: true,
-                },
-                {
-                    name: "Players",
-                    value:
-                        this.playerManager.players.size > 0
-                            ? this.playerManager.players.map(member => member.displayName).join("\n")
-                            : "\u200b",
-                }
-            )
-            .setTimestamp();
-
+        const embed = getLobbyStatus(this);
+        const lobbyButtons = getLobbyButtons(this);
         if (this._message) {
-            this._message.edit({ embeds: [embed] });
+            this._message.edit({
+                embeds: [embed],
+                components: [lobbyButtons],
+            });
         } else {
-            const lobbyButtons = getLobbyButtons(this);
-
             this._message = await this.channel.send({
                 embeds: [embed],
                 components: [lobbyButtons],
             });
 
             const collector = this._message.createMessageComponentCollector({
-                filter: m => m.customId.split("-")[0] === this.owner.id,
+                filter: m => parseButtonId(m.customId).ownerId === this.owner.id,
             });
 
             const lobby = this;
@@ -177,5 +170,73 @@ export class Lobby {
                 await lobby.update();
             });
         }
+    }
+
+    public getTeams() {
+        return {
+            teamA: this.teams.get(TeamLabel.TeamA),
+            teamB: this.teams.get(TeamLabel.TeamB),
+            noTeam: this.teams.get(TeamLabel.NoTeam),
+        };
+    }
+
+    public isFull(): boolean {
+        return this.players.size === MAX_LOBBY_SIZE;
+    }
+
+    public hasPlayer(member: GuildMember): boolean {
+        return this.players.has(member.id);
+    }
+
+    public addPlayer(member: GuildMember): void {
+        if (this.players.has(member.id)) {
+            console.warn(`${member.displayName} was added twice to the lobby`);
+            return;
+        }
+        this.players.set(member.id, member);
+        this.teams.get(TeamLabel.NoTeam).players.set(member.id, member);
+        this.state = LobbyState.Waiting;
+    }
+
+    public removePlayer(member: GuildMember): void {
+        if (this.players.has(member.id)) {
+            this.players.delete(member.id);
+            this.state = LobbyState.Waiting;
+        } else {
+            console.warn(`Attempted to remove ${member.displayName} who was not in the lobby`);
+        }
+
+        if (!this.teams.some(team => team.players.delete(member.id)))
+            console.warn(`Team status of ${member.displayName} was inconsistent`);
+    }
+
+    public moveToTeam(member: GuildMember, teamLabel: TeamLabel): void {
+        if (!this.players.has(member.id)) {
+            console.warn(`Tried to move non-existent user ${member.displayName}`);
+            return;
+        }
+
+        if (this.teams.get(teamLabel).players.size === MAX_TEAM_SIZE) {
+            console.warn(`Tried to move user ${member.displayName} to a full team`);
+            return;
+        }
+
+        this.teams.forEach(team => team.players.delete(member.id));
+        this.teams.get(teamLabel).players.set(member.id, member);
+    }
+
+    public teamOf(player: GuildMember): TeamLabel | null {
+        if (!this.players.has(player.id)) return null;
+        for (const teamLabel in TeamLabel) {
+            if (this.teams.get(TeamLabel[teamLabel] as TeamLabel).players.has(player.id)) {
+                return teamLabel as TeamLabel;
+            }
+        }
+    }
+
+    public resetTeams(): void {
+        this.players.forEach(member => this.teams.get(TeamLabel.NoTeam).players.set(member.id, member));
+        this.teams.set(TeamLabel.TeamA, new Team());
+        this.teams.set(TeamLabel.TeamB, new Team());
     }
 }

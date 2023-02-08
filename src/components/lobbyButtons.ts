@@ -1,7 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 
 import { ButtonType } from "buttons";
-import { Lobby } from "types/Lobby";
+import { Lobby, LobbyState } from "types/Lobby";
 
 export const getButtonId = (lobby: Lobby, buttonType: ButtonType) => `${lobby.owner.id}-${buttonType}`;
 export const parseButtonId = (customId: string) => ({
@@ -14,9 +14,10 @@ export const getLobbyButtons = (lobby: Lobby) =>
         new ButtonBuilder()
             .setCustomId(getButtonId(lobby, ButtonType.Join))
             .setLabel("Join")
-            .setStyle(ButtonStyle.Primary),
+            .setStyle(ButtonStyle.Danger)
+            .setDisabled(lobby.state !== LobbyState.Waiting || lobby.isFull()),
         new ButtonBuilder()
             .setCustomId(getButtonId(lobby, ButtonType.Leave))
             .setLabel("Leave")
-            .setStyle(ButtonStyle.Danger)
+            .setStyle(ButtonStyle.Secondary)
     );
