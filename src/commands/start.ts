@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
 
-import { noLobby } from "errors";
+import { noLobby } from "checks";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 
 export default {

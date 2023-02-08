@@ -9,7 +9,7 @@ export default {
         .setName("kick")
         .setDescription("Kick a player from your customs lobby")
         .addStringOption(option =>
-            option.setName(PLAYER).setDescription("Player to kick").setRequired(true).setAutocomplete(true)
+            option.setName(PLAYER).setDescription("Player to kick").setAutocomplete(true).setRequired(true)
         ),
     execute: async (interaction: ChatInputCommandInteraction) => {
         const client: ValoQuestionMarkClient = interaction.client as ValoQuestionMarkClient;
@@ -34,7 +34,7 @@ export default {
 
         lobby.removePlayer(player);
         await interaction.reply({
-            content: `Kicked \`${player.displayName}\` from the lobby.`,
+            content: `Kicked <@${player.id}> from the lobby.`,
             ephemeral: true,
         });
 
