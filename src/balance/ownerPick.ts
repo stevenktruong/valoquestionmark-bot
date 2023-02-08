@@ -1,7 +1,6 @@
 import { ChatInputCommandInteraction } from "discord.js";
 
 import { getTeamSelector, getTeamSelectorId } from "components/teamSelector";
-import { TeamLabel } from "types/Lobby";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 
 export const handleOwnerPick = async (interaction: ChatInputCommandInteraction) => {
@@ -20,14 +19,9 @@ export const handleOwnerPick = async (interaction: ChatInputCommandInteraction) 
         }
 
         lobby.resetTeams();
-        const selection = i.values;
-        lobby.players.forEach((member, id) => {
-            if (selection.includes(id)) {
-                lobby.moveToTeam(member, TeamLabel.TeamA);
-            } else {
-                lobby.moveToTeam(member, TeamLabel.TeamB);
-            }
-        });
+        const playerIdsA = i.values;
+        const playerIdsB = lobby.players.filter(member => !i.values.includes(member.id)).map(member => member.id);
+        lobby.makeTeams(playerIdsA, playerIdsB);
 
         await i.update({
             content:

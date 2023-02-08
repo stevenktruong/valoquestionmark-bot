@@ -1,8 +1,8 @@
 import { ChatInputCommandInteraction } from "discord.js";
 
 import { spawn } from "child_process";
-import { getPlayerFromId } from "players";
-import { TeamLabel } from "types/Lobby";
+import { getIdFromPlayer, getPlayerFromId } from "players";
+import { Team, TeamLabel } from "types/Lobby";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 
 const pythonPath = "./src/algorithms/env/bin/python";
@@ -33,25 +33,24 @@ export const handleAndyOne = async (interaction: ChatInputCommandInteraction) =>
     await interaction.deferReply({ ephemeral: true });
 
     const python = spawn(pythonPath, [scriptPath, "--balance", ...players]);
-    const { teamA, teamB } = await new Promise<{ teamA: string[]; teamB: string[] }>((resolve, reject) => {
-        python.stdout.on("data", data => {
-            const { team_red, team_blue }: { team_red: string[]; team_blue: string[] } = JSON.parse(
-                data.toString("utf8")
-            );
-            resolve({ teamA: team_red, teamB: team_blue });
-        });
+    const { teamANames, teamBNames } = await new Promise<{ teamANames: string[]; teamBNames: string[] }>(
+        (resolve, reject) => {
+            python.stdout.on("data", data => {
+                const { team_red, team_blue }: { team_red: string[]; team_blue: string[] } = JSON.parse(
+                    data.toString("utf8")
+                );
+                resolve({ teamANames: team_red, teamBNames: team_blue });
+            });
 
-        python.stderr.on("data", data => console.log(data.toString("utf8")));
-    });
+            python.stderr.on("data", data => console.log(data.toString("utf8")));
+        }
+    );
+
+    const teamAIds = teamANames.map(getIdFromPlayer);
+    const teamBIds = teamBNames.map(getIdFromPlayer);
 
     lobby.resetTeams();
-    lobby.players.forEach((member, id) => {
-        if (teamA.includes(getPlayerFromId(id))) {
-            lobby.moveToTeam(member, TeamLabel.TeamA);
-        } else {
-            lobby.moveToTeam(member, TeamLabel.TeamB);
-        }
-    });
+    lobby.makeTeams(teamAIds, teamBIds);
 
     await interaction.followUp({
         content:

@@ -3,7 +3,7 @@ import { EmbedBuilder } from "discord.js";
 import { Lobby, LobbyState, MAX_LOBBY_SIZE } from "types/Lobby";
 
 export const getLobbyStatus = (lobby: Lobby) => {
-    const { teamA, teamB } = lobby.getTeams();
+    const { teamA, teamB } = lobby.teams;
 
     return new EmbedBuilder()
         .setColor("#fb0e42")
@@ -45,11 +45,8 @@ export const getLobbyStatus = (lobby: Lobby) => {
                   ]
                 : [
                       {
-                          name: `👥 Players (${lobby.players.size}/${MAX_LOBBY_SIZE})`,
-                          value:
-                              lobby.players.size > 0
-                                  ? lobby.players.map(member => member.displayName).join("\n")
-                                  : "\u200b",
+                          name: `👥 Players (${lobby.size}/${MAX_LOBBY_SIZE})`,
+                          value: lobby.size > 0 ? lobby.players.map(member => member.displayName).join("\n") : "\u200b",
                       },
                   ]),
             {

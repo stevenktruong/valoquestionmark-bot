@@ -38,7 +38,7 @@ export default {
             return;
         }
 
-        if (lobby.players.size == 0) {
+        if (lobby.size == 0) {
             await interaction.reply({
                 content: "Your lobby doesn't have any players",
                 ephemeral: true,
@@ -57,7 +57,6 @@ export default {
         const handler = client.balanceStrategies.get(balanceStrategy);
         try {
             handler(interaction);
-            lobby.state = LobbyState.Balanced;
         } catch (error) {
             console.error(error);
             await interaction.reply({

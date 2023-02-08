@@ -23,7 +23,7 @@ export const handleJoin = async (interaction: ButtonInteraction) => {
         );
 
     if (!lobby.hasPlayer(member)) {
-        if (lobby.players.size === MAX_LOBBY_SIZE) {
+        if (lobby.size === MAX_LOBBY_SIZE) {
             await interaction.reply({ content: "This lobby is full", ephemeral: true });
             return;
         }

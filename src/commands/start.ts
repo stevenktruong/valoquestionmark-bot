@@ -12,7 +12,7 @@ export default {
             return;
         }
 
-        const { teamA, teamB } = lobby.getTeams();
+        const { teamA, teamB } = lobby.teams;
         if (teamA.players.size == 0 || teamB.players.size == 0) {
             await interaction.reply({
                 content: "At least one team doesn't have any players. Run `/balance` to pick teams.",

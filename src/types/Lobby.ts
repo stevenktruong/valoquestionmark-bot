@@ -38,9 +38,9 @@ export enum TeamLabel {
 type GuildMemberCollection = Collection<Snowflake, GuildMember>;
 
 export class Team {
-    public constructor() {
-        this.captain = null;
-        this.players = new Collection();
+    public constructor(players: GuildMemberCollection = new Collection(), captain: GuildMember = null) {
+        this.captain = captain;
+        this.players = players;
     }
 
     captain?: GuildMember;
@@ -48,13 +48,16 @@ export class Team {
 }
 
 export class Lobby {
-    public state: LobbyState;
-    public channelIds: Snowflake[];
     public readonly owner: GuildMember;
     public readonly guild: Guild;
     public readonly channel: GuildTextBasedChannel;
-    public readonly players: GuildMemberCollection;
-    public readonly teams: Collection<TeamLabel, Team>;
+
+    private _state: LobbyState;
+    private _channelIds: Snowflake[];
+
+    private _players: GuildMemberCollection;
+    private _teamA: Team;
+    private _teamB: Team;
 
     // Main message representing the lobby status
     private _message: Message;
@@ -65,17 +68,14 @@ export class Lobby {
     private _channelB: VoiceChannel;
 
     public constructor(owner: GuildMember, guild: Guild, channel: GuildTextBasedChannel) {
-        this.state = LobbyState.Waiting;
-        this.channelIds = [];
         this.owner = owner;
         this.guild = guild;
         this.channel = channel;
-        this.players = new Collection();
-        this.teams = new Collection([
-            [TeamLabel.NoTeam, new Team()],
-            [TeamLabel.TeamA, new Team()],
-            [TeamLabel.TeamB, new Team()],
-        ]);
+        this._state = LobbyState.Waiting;
+        this._channelIds = [];
+        this._players = new Collection();
+        this._teamA = new Team();
+        this._teamB = new Team();
     }
 
     public async destroy() {
@@ -86,7 +86,7 @@ export class Lobby {
     }
 
     public async start() {
-        const { teamA, teamB } = this.getTeams();
+        const { teamA, teamB } = this.teams;
 
         this._category = await this.guild.channels.create({
             name: `${this.owner.displayName}'s Customs`,
@@ -95,7 +95,7 @@ export class Lobby {
         this._channelA = await this._category.children.create({ name: "attackers", type: ChannelType.GuildVoice });
         this._channelB = await this._category.children.create({ name: "defenders", type: ChannelType.GuildVoice });
 
-        this.channelIds = [this._category.id, this._channelA.id, this._channelB.id];
+        this._channelIds = [this._category.id, this._channelA.id, this._channelB.id];
 
         try {
             await Promise.all([
@@ -106,7 +106,7 @@ export class Lobby {
             // Ignore errors when moving players since we don't care if it succeeds or not
         }
 
-        this.state = LobbyState.Playing;
+        this._state = LobbyState.Playing;
     }
 
     public async stop(channel: VoiceChannel) {
@@ -123,15 +123,11 @@ export class Lobby {
         this._channelB = null;
         this._channelA = null;
         this._category = null;
-
-        this.channelIds = [];
-
-        this.state = LobbyState.Waiting;
+        this._channelIds = [];
+        this._state = LobbyState.Balanced;
     }
 
     public async update() {
-        const { teamA, teamB } = this.getTeams();
-
         const embed = getLobbyStatus(this);
         const lobbyButtons = getLobbyButtons(this);
         if (this._message) {
@@ -172,71 +168,99 @@ export class Lobby {
         }
     }
 
-    public getTeams() {
+    get state(): LobbyState {
+        return this._state;
+    }
+
+    set state(state: LobbyState) {
+        this._state = state;
+    }
+
+    get channelIds(): Snowflake[] {
+        return this._channelIds;
+    }
+
+    get players(): GuildMember[] {
+        return this._players.map(member => member);
+    }
+
+    get teams() {
+        // TODO: Make sure these are immutable
         return {
-            teamA: this.teams.get(TeamLabel.TeamA),
-            teamB: this.teams.get(TeamLabel.TeamB),
-            noTeam: this.teams.get(TeamLabel.NoTeam),
+            teamA: this._teamA,
+            teamB: this._teamB,
         };
     }
 
+    get size(): number {
+        return this._players.size;
+    }
+
     public isFull(): boolean {
-        return this.players.size === MAX_LOBBY_SIZE;
+        return this._players.size === MAX_LOBBY_SIZE;
     }
 
     public hasPlayer(member: GuildMember): boolean {
-        return this.players.has(member.id);
+        return this._players.has(member.id);
     }
 
     public addPlayer(member: GuildMember): void {
-        if (this.players.has(member.id)) {
+        if (this._players.has(member.id)) {
             console.warn(`${member.displayName} was added twice to the lobby`);
             return;
         }
-        this.players.set(member.id, member);
-        this.teams.get(TeamLabel.NoTeam).players.set(member.id, member);
-        this.state = LobbyState.Waiting;
+        this._players.set(member.id, member);
+        this._state = LobbyState.Waiting;
     }
 
     public removePlayer(member: GuildMember): void {
-        if (this.players.has(member.id)) {
-            this.players.delete(member.id);
-            this.state = LobbyState.Waiting;
+        if (this._players.has(member.id)) {
+            this._players.delete(member.id);
+            this._state = LobbyState.Waiting;
         } else {
             console.warn(`Attempted to remove ${member.displayName} who was not in the lobby`);
         }
 
-        if (!this.teams.some(team => team.players.delete(member.id)))
+        if (![this._teamA, this._teamB].some(team => team.players.delete(member.id)))
             console.warn(`Team status of ${member.displayName} was inconsistent`);
     }
 
-    public moveToTeam(member: GuildMember, teamLabel: TeamLabel): void {
-        if (!this.players.has(member.id)) {
-            console.warn(`Tried to move non-existent user ${member.displayName}`);
+    public makeTeams(teamAIds: Snowflake[], teamBIds: Snowflake[]): void {
+        if (teamAIds.length + teamBIds.length != MAX_LOBBY_SIZE) {
+            console.warn("Tried to make teams with fewer than 10 players total");
             return;
         }
 
-        if (this.teams.get(teamLabel).players.size === MAX_TEAM_SIZE) {
-            console.warn(`Tried to move user ${member.displayName} to a full team`);
-            return;
-        }
+        let validTeams = true;
+        [teamAIds, teamBIds].forEach(playerIds =>
+            playerIds.forEach(id => {
+                if (!this._players.has(id)) {
+                    console.warn(`Tried to assign non-existent player with ${id} to a team`);
+                    validTeams = false;
+                    return;
+                }
+            })
+        );
+        if (!validTeams) return;
 
-        this.teams.forEach(team => team.players.delete(member.id));
-        this.teams.get(teamLabel).players.set(member.id, member);
+        const teamA = new Team(new Collection(teamAIds.map(id => [id, this._players.get(id)])));
+        const teamB = new Team(new Collection(teamBIds.map(id => [id, this._players.get(id)])));
+
+        this._teamA = teamA;
+        this._teamB = teamB;
+        this._state = LobbyState.Balanced;
     }
 
     public teamOf(player: GuildMember): TeamLabel | null {
-        if (!this.players.has(player.id)) return null;
-        for (const teamLabel in TeamLabel) {
-            if (this.teams.get(TeamLabel[teamLabel] as TeamLabel).players.has(player.id)) {
-                return teamLabel as TeamLabel;
-            }
-        }
+        if (!this._players.has(player.id)) return null;
+        if (this._teamA.players.has(player.id)) return TeamLabel.TeamA;
+        if (this._teamB.players.has(player.id)) return TeamLabel.TeamB;
+
+        console.warn(`${player.displayName} is in the lobby but not in a team`);
     }
 
     public resetTeams(): void {
-        this.players.forEach(member => this.teams.get(TeamLabel.NoTeam).players.set(member.id, member));
-        this.teams.set(TeamLabel.TeamA, new Team());
-        this.teams.set(TeamLabel.TeamB, new Team());
+        this._teamA = new Team();
+        this._teamB = new Team();
     }
 }
