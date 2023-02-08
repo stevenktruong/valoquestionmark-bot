@@ -1,7 +1,6 @@
 import { ButtonInteraction, GuildMember } from "discord.js";
 
 import { parseButtonId } from "components/lobbyButtons";
-import { LobbyState } from "types/Lobby";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 
 export const handleLeave = async (interaction: ButtonInteraction) => {

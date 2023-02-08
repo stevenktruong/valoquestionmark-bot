@@ -172,10 +172,6 @@ export class Lobby {
         return this._state;
     }
 
-    set state(state: LobbyState) {
-        this._state = state;
-    }
-
     get channelIds(): Snowflake[] {
         return this._channelIds;
     }
@@ -200,6 +196,11 @@ export class Lobby {
         return this._players.size === MAX_LOBBY_SIZE;
     }
 
+    public getPlayer(id: Snowflake): GuildMember | null {
+        if (this._players.has(id)) return this._players.get(id);
+        else return null;
+    }
+
     public hasPlayer(member: GuildMember): boolean {
         return this._players.has(member.id);
     }
@@ -220,9 +221,6 @@ export class Lobby {
         } else {
             console.warn(`Attempted to remove ${member.displayName} who was not in the lobby`);
         }
-
-        if (![this._teamA, this._teamB].some(team => team.players.delete(member.id)))
-            console.warn(`Team status of ${member.displayName} was inconsistent`);
     }
 
     public makeTeams(teamAIds: Snowflake[], teamBIds: Snowflake[]): void {

@@ -6,6 +6,7 @@ import {
     Collection,
     ButtonInteraction,
     GuildMember,
+    AutocompleteInteraction,
 } from "discord.js";
 
 import { BalanceStrategy } from "balance";
@@ -46,6 +47,7 @@ export class ValoQuestionMarkClient extends Client {
 export interface Command {
     data: any;
     execute: (interaction: ChatInputCommandInteraction) => unknown;
+    autocomplete?: (interaction: AutocompleteInteraction) => unknown;
 }
 
 export type ButtonHandler = (interaction: ButtonInteraction) => unknown;
