@@ -23,6 +23,10 @@ export default {
                     {
                         name: "Andy algorithm 1",
                         value: BalanceStrategy.AndyOne,
+                    },
+                    {
+                        name: "Andy algorithm 2",
+                        value: BalanceStrategy.AndyTwo,
                     }
                 )
                 .setRequired(true)
@@ -35,7 +39,7 @@ export default {
 
         if (lobby.size == 0) {
             await interaction.reply({
-                content: "Your lobby doesn't have any players",
+                content: "Your lobby doesn't have any players to balance!",
                 ephemeral: true,
             });
             return;
