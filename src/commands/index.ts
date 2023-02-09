@@ -10,6 +10,7 @@ import refresh from "./refresh";
 import remove from "./remove";
 import start from "./start";
 import stop from "./stop";
+import swap from "./swap";
 
 const commands = new Collection<string, Command>();
 commands.set("add", add);
@@ -20,5 +21,6 @@ commands.set("remove", remove);
 commands.set("refresh", refresh);
 commands.set("start", start);
 commands.set("stop", stop);
+commands.set("swap", swap);
 
 export default commands;
