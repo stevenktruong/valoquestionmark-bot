@@ -9,9 +9,11 @@ import {
     AutocompleteInteraction,
 } from "discord.js";
 
+import { Logger } from "pino";
+
 import { BalanceStrategy } from "balance";
 import { ButtonType } from "buttons";
-import pino, { Logger } from "pino";
+import logger from "logger";
 
 import { Lobby } from "./Lobby";
 
@@ -35,17 +37,7 @@ export class ValoQuestionMarkClient extends Client {
         this._balanceStrategies = balanceStrategies;
         this._lobbies = new Collection();
 
-        this._logger = pino({
-            base: {
-                pid: undefined,
-            },
-            transport: {
-                target: "pino-pretty",
-                options: {
-                    translateTime: "SYS:yyyy-mm-dd HH:MM:ss o",
-                },
-            },
-        });
+        this._logger = logger;
     }
 
     get commands() {

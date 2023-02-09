@@ -10,9 +10,10 @@ import {
     Snowflake,
 } from "discord.js";
 
+import { Logger } from "pino";
+
 import { parseButtonId, getLobbyButtons } from "components/lobbyButtons";
 import { getLobbyStatus } from "embeds/lobbyStatus";
-import { Logger } from "pino";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 
 export const MAX_LOBBY_SIZE = 10;

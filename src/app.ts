@@ -1,9 +1,10 @@
 import { Events } from "discord.js";
 
+import dotenv from "dotenv";
+
 import balanceStrategies from "balance";
 import buttonHandlers from "buttons";
 import commands from "commands";
-import dotenv from "dotenv";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 
 dotenv.config();

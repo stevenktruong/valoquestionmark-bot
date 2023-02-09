@@ -2,6 +2,11 @@
     "tabWidth": 4,
     "arrowParens": "avoid",
     "printWidth": 120,
-    "importOrder": ["^discord.js$", "<THIRD_PARTY_MODULES>", "^[./]"],
+    "importOrder": [
+        "^discord.js$",
+        "<THIRD_PARTY_MODULES>",
+        "^(algorithms|balance|buttons|checks|commands|components|embeds|logger|players|types).*$",
+        "^[./]"
+    ],
     "importOrderSeparation": true
 }
