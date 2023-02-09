@@ -12,6 +12,7 @@ import {
 } from "discord.js";
 
 import { Logger } from "pino";
+import { wait } from "utils";
 
 import { parseButtonId, getLobbyButtons } from "components/lobbyButtons";
 import { getLobbyStatus } from "embeds/lobbyStatus";
@@ -111,11 +112,8 @@ export class Lobby {
         });
         this._channelA = await this._category.children.create({ name: "attackers", type: ChannelType.GuildVoice });
         this._channelB = await this._category.children.create({ name: "defenders", type: ChannelType.GuildVoice });
-
         this._channelIds = [this._category.id, this._channelA.id, this._channelB.id];
 
-        // Small delay to make sure the channels get created in time
-        await new Promise(resolve => setTimeout(resolve, 500));
         await Promise.all([
             ...teamA.players.filter(member => member.voice).map(member => member.voice.setChannel(this._channelA)),
             ...teamB.players.filter(member => member.voice).map(member => member.voice.setChannel(this._channelB)),
@@ -131,8 +129,11 @@ export class Lobby {
                 .map(member => member.voice.setChannel(channel))
         );
 
-        // Small delay to make sure everyone is moved in time
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // TODO: Exponential backoff?
+        while (this._channelA.members.size > 0 || this._channelB.members.size > 0) {
+            await wait(250);
+        }
+
         if (this._channelB) await this._channelB.delete();
         if (this._channelA) await this._channelA.delete();
         if (this._category) await this._category.delete();

@@ -20,10 +20,9 @@ process.on("SIGINT", async () => {
     try {
         await client.cleanup();
     } catch (error) {
-        logger.warn(`Failed to remove all channels and messages: ${error}`);
-    } finally {
-        logger.info("Successfully cleaned up created channels and messages.");
+        logger.warn(error, "Failed to remove all channels and messages.");
     }
+    logger.info("Successfully cleaned up created channels and messages.");
     process.exit();
 });
 
