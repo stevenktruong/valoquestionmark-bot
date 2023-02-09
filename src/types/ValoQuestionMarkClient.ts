@@ -36,9 +36,14 @@ export class ValoQuestionMarkClient extends Client {
         this._lobbies = new Collection();
 
         this._logger = pino({
-            base: undefined,
+            base: {
+                pid: undefined,
+            },
             transport: {
                 target: "pino-pretty",
+                options: {
+                    translateTime: "SYS:yyyy-mm-dd HH:MM:ss o",
+                },
             },
         });
     }
