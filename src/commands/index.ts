@@ -6,8 +6,8 @@ import add from "./add";
 import balance from "./balance";
 import create from "./create";
 import _delete from "./delete";
-import kick from "./kick";
 import refresh from "./refresh";
+import remove from "./remove";
 import start from "./start";
 import stop from "./stop";
 
@@ -16,7 +16,7 @@ commands.set("add", add);
 commands.set("balance", balance);
 commands.set("create", create);
 commands.set("delete", _delete);
-commands.set("kick", kick);
+commands.set("remove", remove);
 commands.set("refresh", refresh);
 commands.set("start", start);
 commands.set("stop", stop);

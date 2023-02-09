@@ -7,10 +7,10 @@ const PLAYER = "player";
 
 export default {
     data: new SlashCommandBuilder()
-        .setName("kick")
-        .setDescription("Kick a player from your customs lobby")
+        .setName("remove")
+        .setDescription("Remove a player from your customs lobby")
         .addStringOption(option =>
-            option.setName(PLAYER).setDescription("Player to kick").setAutocomplete(true).setRequired(true)
+            option.setName(PLAYER).setDescription("Player to remove").setAutocomplete(true).setRequired(true)
         ),
     execute: async (interaction: ChatInputCommandInteraction) => {
         const client: ValoQuestionMarkClient = interaction.client as ValoQuestionMarkClient;

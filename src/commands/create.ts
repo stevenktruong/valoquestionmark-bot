@@ -38,7 +38,10 @@ export default {
         }
 
         await interaction.reply({
-            content: "Successfully created a lobby! Once everyone joins, run `/balance` to pick teams.",
+            content:
+                "Successfully created a lobby!" +
+                "\n- Once everyone joins, run `/balance` to pick teams." +
+                "\n- You can manually add and remove players with `/add` and `/remove`, respectively.",
             ephemeral: true,
         });
         await lobby.update();
