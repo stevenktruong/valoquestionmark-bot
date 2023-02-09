@@ -17,9 +17,20 @@ export const handleOwnerPick = async (interaction: ChatInputCommandInteraction) 
         filter: m => m.customId === getTeamSelectorId(lobby),
         max: 1,
     });
-    lobby.addCollector(collector);
+    lobby.addBalanceCollector(collector);
 
-    collector.on("collect", async i => {
+    collector.on("end", async collected => {
+        const i = collected.first();
+        if (!i) {
+            // If it didn't collect anything, then the collector ended because the players changed
+            await interaction.editReply({
+                content:
+                    "Canceling since someone joined or left during balancing. You can run `/balance` to try again.",
+                components: [],
+            });
+            return;
+        }
+
         if (!i.isStringSelectMenu()) {
             client.logger.error(
                 {
@@ -48,13 +59,5 @@ export const handleOwnerPick = async (interaction: ChatInputCommandInteraction) 
             components: [],
         });
         await lobby.update();
-    });
-
-    collector.on("end", async collected => {
-        if (collected.size > 0) return;
-        await interaction.editReply({
-            content: "Aborting since someone joined or left during balancing. You can run `/balance` to try again.",
-            components: [],
-        });
     });
 };
