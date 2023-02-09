@@ -35,11 +35,12 @@ export class ValoQuestionMarkClient extends Client {
         this._balanceStrategies = balanceStrategies;
         this._lobbies = new Collection();
 
-        this._logger = pino(
-            pino.transport({
+        this._logger = pino({
+            base: undefined,
+            transport: {
                 target: "pino-pretty",
-            })
-        );
+            },
+        });
     }
 
     get commands() {
