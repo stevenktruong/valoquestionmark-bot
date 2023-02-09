@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import balanceStrategies from "balance";
 import buttonHandlers from "buttons";
 import commands from "commands";
+import logger from "logger";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 
 dotenv.config();
@@ -15,15 +16,14 @@ client.once(Events.ClientReady, c => {
     client.logger.info(`Ready! Logged in as ${c.user.tag}`);
 });
 
-process.on("SIGTERM", async () => {
+process.on("SIGINT", async () => {
     try {
         await client.cleanup();
     } catch (error) {
-        console.error(`Failed to remove all channels and messages: ${error}`);
+        logger.warn(`Failed to remove all channels and messages: ${error}`);
     } finally {
-        console.log("Successfully cleaned up created channels and messages.");
+        logger.info("Successfully cleaned up created channels and messages.");
     }
-
     process.exit();
 });
 

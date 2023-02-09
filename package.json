@@ -21,7 +21,7 @@
         "typescript": "^4.9.4"
     },
     "scripts": {
-        "start": "nodemon --signal SIGTERM --exec ts-node src/app.ts",
+        "start": "nodemon --signal SIGINT --exec ts-node src/app.ts",
         "deploy": "ts-node scripts/deploy-commands.ts"
     }
 }
