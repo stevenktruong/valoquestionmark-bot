@@ -9,6 +9,10 @@ import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 const pythonPath = "./src/algorithms/env/bin/python";
 const scriptPath = "./src/algorithms/acs-predict-score-delta.py";
 
+/**
+ * Uses a ML model to predict score differentials based on each player's ACS on each team per map.
+ * Use teams that have the smallest predicted score differential using their overall average ACS.
+ */
 export const handleAndyOne = async (interaction: ChatInputCommandInteraction) => {
     const client: ValoQuestionMarkClient = interaction.client as ValoQuestionMarkClient;
     const lobby = client.lobbies.get(interaction.user.id);

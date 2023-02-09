@@ -25,6 +25,9 @@ const playerRanks = {
 
 const draftOrder = [1, 1, 1, 2, 2, 2, 1];
 
+/**
+ * Snake draft using a hard-coded ordering of the players.
+ */
 export const handleAndyTwo = async (interaction: ChatInputCommandInteraction) => {
     const client: ValoQuestionMarkClient = interaction.client as ValoQuestionMarkClient;
     const lobby = client.lobbies.get(interaction.user.id);
