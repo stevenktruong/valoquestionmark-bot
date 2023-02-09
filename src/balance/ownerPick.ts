@@ -14,7 +14,16 @@ export const handleOwnerPick = async (interaction: ChatInputCommandInteraction) 
 
     await message.awaitMessageComponent({ filter: m => m.customId === getTeamSelectorId(lobby) }).then(async i => {
         if (!i.isStringSelectMenu()) {
-            console.error("Selector filter picked up a non-selector interaction");
+            client.logger.error(
+                {
+                    interaction: {
+                        customId: i.customId,
+                        interactionId: i.id,
+                        user: interaction.user.username,
+                    },
+                },
+                "Non-selector interaction had the custom id of a selector."
+            );
             return;
         }
 

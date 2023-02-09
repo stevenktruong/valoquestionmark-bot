@@ -30,7 +30,7 @@ export default {
             : interaction.channelId;
         const channel = (await interaction.guild.channels.fetch(channelId)) as GuildTextBasedChannel;
 
-        const lobby = new Lobby(member, guild, channel);
+        const lobby = new Lobby(client, member, guild, channel);
 
         if (!client.newLobby(member, lobby)) {
             await interaction.reply({ content: "You already created a lobby", ephemeral: true });

@@ -11,7 +11,7 @@ const { DISCORD_TOKEN } = process.env;
 
 const client = new ValoQuestionMarkClient(commands, buttonHandlers, balanceStrategies);
 client.once(Events.ClientReady, c => {
-    console.log(`Ready! Logged in as ${c.user.tag}`);
+    client.logger.info(`Ready! Logged in as ${c.user.tag}`);
 });
 
 process.on("SIGTERM", async () => {
@@ -29,28 +29,43 @@ process.on("SIGTERM", async () => {
 client.on(Events.InteractionCreate, async interaction => {
     if (interaction.isChatInputCommand()) {
         const command = client.commands.get(interaction.commandName);
+        const commandLogger = client.logger.child({
+            guild: interaction.guild.name,
+            user: interaction.user.username,
+            command: interaction.toString(),
+        });
         if (!command) {
-            console.error(`No command matching ${interaction.commandName} was found.`);
+            commandLogger.warn("Received an invalid slash command.");
             return;
         }
+
+        commandLogger.info("Received a slash command.");
 
         try {
             await command.execute(interaction);
         } catch (error) {
-            console.error(error);
+            commandLogger.error(error);
             await interaction.reply({ content: "There was an error while executing this command!", ephemeral: true });
         }
     } else if (interaction.isAutocomplete()) {
         const command = client.commands.get(interaction.commandName);
+        const autocompleteLogger = client.logger.child({
+            guild: interaction.guild.name,
+            user: interaction.user.username,
+            command: `/${interaction.commandName}`,
+        });
+
         if (!command) {
-            console.error(`No command matching ${interaction.commandName} was found.`);
+            autocompleteLogger.info("Received an invalid autocomplete request.");
             return;
         }
+
+        autocompleteLogger.info("Received an autocomplete request.");
 
         try {
             await command.autocomplete(interaction);
         } catch (error) {
-            console.error(error);
+            autocompleteLogger.error(error);
         }
     }
 });

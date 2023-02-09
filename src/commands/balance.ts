@@ -51,9 +51,9 @@ export default {
 
         const handler = client.balanceStrategies.get(balanceStrategy);
         try {
-            handler(interaction);
+            await handler(interaction);
         } catch (error) {
-            console.error(error);
+            client.logger.error(error);
             await interaction.reply({
                 content: "There was an error while handling this balance strategy!",
                 ephemeral: true,

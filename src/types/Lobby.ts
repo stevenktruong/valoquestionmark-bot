@@ -12,6 +12,7 @@ import {
 
 import { parseButtonId, getLobbyButtons } from "components/lobbyButtons";
 import { getLobbyStatus } from "embeds/lobbyStatus";
+import { Logger } from "pino";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 
 export const MAX_LOBBY_SIZE = 10;
@@ -67,7 +68,14 @@ export class Lobby {
     private _channelA: VoiceChannel;
     private _channelB: VoiceChannel;
 
-    public constructor(owner: GuildMember, guild: Guild, channel: GuildTextBasedChannel) {
+    private _logger: Logger;
+
+    public constructor(
+        client: ValoQuestionMarkClient,
+        owner: GuildMember,
+        guild: Guild,
+        channel: GuildTextBasedChannel
+    ) {
         this.owner = owner;
         this.guild = guild;
         this.channel = channel;
@@ -76,6 +84,11 @@ export class Lobby {
         this._players = new Collection();
         this._teamA = new Team();
         this._teamB = new Team();
+        this._logger = client.logger.child({
+            guild: guild.name,
+            owner: owner.displayName,
+            channel: channel.name,
+        });
     }
 
     public async destroy() {
@@ -148,7 +161,16 @@ export class Lobby {
             const lobby = this;
             collector.on("collect", async i => {
                 if (!i.isButton()) {
-                    console.error("Button filter picked up a non-button interaction");
+                    this._logger.warn(
+                        {
+                            interaction: {
+                                customId: i.customId,
+                                interactionId: i.id,
+                                user: i.user.id,
+                            },
+                        },
+                        "Non-button interaction had the custom id of a button."
+                    );
                     return;
                 }
 
@@ -159,7 +181,7 @@ export class Lobby {
                 try {
                     handler(i);
                 } catch (error) {
-                    console.error(error);
+                    this._logger.error(error);
                     await i.reply({ content: "There was an error while handling this button!", ephemeral: true });
                 }
 
@@ -207,7 +229,15 @@ export class Lobby {
 
     public addPlayer(member: GuildMember): void {
         if (this._players.has(member.id)) {
-            console.warn(`${member.displayName} was added twice to the lobby`);
+            this._logger.warn(
+                {
+                    member: {
+                        name: member.displayName,
+                        id: member.id,
+                    },
+                },
+                "Attempted to add a duplicate member."
+            );
             return;
         }
         this._players.set(member.id, member);
@@ -219,13 +249,29 @@ export class Lobby {
             this._players.delete(member.id);
             this._state = LobbyState.Waiting;
         } else {
-            console.warn(`Attempted to remove ${member.displayName} who was not in the lobby`);
+            this._logger.warn(
+                {
+                    member: {
+                        name: member.displayName,
+                        id: member.id,
+                    },
+                },
+                "Attempted to remove a non-existent player."
+            );
         }
     }
 
     public makeTeams(teamAIds: Snowflake[], teamBIds: Snowflake[]): void {
         if (teamAIds.length + teamBIds.length != MAX_LOBBY_SIZE) {
-            console.warn("Tried to make teams with fewer than 10 players total");
+            this._logger.warn(
+                {
+                    teams: {
+                        teamAIds,
+                        teamBIds,
+                    },
+                },
+                "Tried to make teams with fewer than 10 players total."
+            );
             return;
         }
 
@@ -233,7 +279,12 @@ export class Lobby {
         [teamAIds, teamBIds].forEach(playerIds =>
             playerIds.forEach(id => {
                 if (!this._players.has(id)) {
-                    console.warn(`Tried to assign non-existent player with ${id} to a team`);
+                    this._logger.warn(
+                        {
+                            player: { id },
+                        },
+                        "Tried to assign non-existent player to a team."
+                    );
                     validTeams = false;
                     return;
                 }
@@ -253,8 +304,7 @@ export class Lobby {
         if (!this._players.has(player.id)) return null;
         if (this._teamA.players.has(player.id)) return TeamLabel.TeamA;
         if (this._teamB.players.has(player.id)) return TeamLabel.TeamB;
-
-        console.warn(`${player.displayName} is in the lobby but not in a team`);
+        return TeamLabel.NoTeam;
     }
 
     public resetTeams(): void {

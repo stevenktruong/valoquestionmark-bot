@@ -41,7 +41,9 @@ export const handleAndyOne = async (interaction: ChatInputCommandInteraction) =>
                 resolve({ teamANames: team_red, teamBNames: team_blue });
             });
 
-            python.stderr.on("data", data => console.log(data.toString("utf8")));
+            python.stderr.on("data", data =>
+                client.logger.warn(data.toString("utf8"), "Error executing `acs-predict-score-delta.py`.")
+            );
         }
     );
 

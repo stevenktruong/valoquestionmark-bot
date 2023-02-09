@@ -11,14 +11,17 @@ import {
 
 import { BalanceStrategy } from "balance";
 import { ButtonType } from "buttons";
+import pino, { Logger } from "pino";
 
 import { Lobby } from "./Lobby";
 
 export class ValoQuestionMarkClient extends Client {
-    public commands: Collection<string, Command>;
-    public buttons: Collection<ButtonType, ButtonHandler>;
-    public balanceStrategies: Collection<BalanceStrategy, BalanceStrategyHandler>;
-    public lobbies: Collection<Snowflake, Lobby>;
+    private _commands: Collection<string, Command>;
+    private _buttons: Collection<ButtonType, ButtonHandler>;
+    private _balanceStrategies: Collection<BalanceStrategy, BalanceStrategyHandler>;
+    private _lobbies: Collection<Snowflake, Lobby>;
+
+    private _logger: Logger;
 
     public constructor(
         commands: Collection<string, Command>,
@@ -27,10 +30,36 @@ export class ValoQuestionMarkClient extends Client {
     ) {
         super({ intents: [GatewayIntentBits.Guilds] });
 
-        this.commands = commands;
-        this.buttons = buttons;
-        this.balanceStrategies = balanceStrategies;
-        this.lobbies = new Collection();
+        this._commands = commands;
+        this._buttons = buttons;
+        this._balanceStrategies = balanceStrategies;
+        this._lobbies = new Collection();
+
+        this._logger = pino(
+            pino.transport({
+                target: "pino-pretty",
+            })
+        );
+    }
+
+    get commands() {
+        return this._commands;
+    }
+
+    get buttons() {
+        return this._buttons;
+    }
+
+    get balanceStrategies() {
+        return this._balanceStrategies;
+    }
+
+    get lobbies() {
+        return this._lobbies;
+    }
+
+    get logger() {
+        return this._logger;
     }
 
     public newLobby(member: GuildMember, lobby: Lobby): boolean {
