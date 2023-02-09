@@ -63,7 +63,7 @@ export class Lobby {
     private _teamB: Team;
 
     private _message: Message; // Main message representing the lobby status
-    private _collectors: InteractionCollector<any>[]; // Active non-button collectors, e.g., from draft picking
+    private _balanceCollectors: InteractionCollector<any>[]; // Collectors related to team balancing
 
     // Channels created for the lobby
     private _category: CategoryChannel;
@@ -86,7 +86,7 @@ export class Lobby {
         this._players = new Collection();
         this._teamA = new Team();
         this._teamB = new Team();
-        this._collectors = [];
+        this._balanceCollectors = [];
         this._logger = client.logger.child({
             guild: guild.name,
             owner: owner.displayName,
@@ -95,7 +95,7 @@ export class Lobby {
     }
 
     public async destroy() {
-        await Promise.all(this._collectors.map(collector => collector.stop()));
+        this.stopBalanceCollectors();
         if (this._message) await this._message.delete();
         if (this._channelB) await this._channelB.delete();
         if (this._channelA) await this._channelA.delete();
@@ -114,19 +114,25 @@ export class Lobby {
 
         this._channelIds = [this._category.id, this._channelA.id, this._channelB.id];
 
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Small delay to make sure the channels get created in time
+        await new Promise(resolve => setTimeout(resolve, 500));
         await Promise.all([
             ...teamA.players.filter(member => member.voice).map(member => member.voice.setChannel(this._channelA)),
             ...teamB.players.filter(member => member.voice).map(member => member.voice.setChannel(this._channelB)),
         ]);
 
-        this.state = LobbyState.Playing;
+        this._state = LobbyState.Playing;
     }
 
     public async stop(channel: VoiceChannel) {
-        await Promise.all(this._category.members.map(member => member.voice.setChannel(channel)));
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await Promise.all(
+            this._category.members
+                .filter(member => member.voice && member.voice.channelId)
+                .map(member => member.voice.setChannel(channel))
+        );
 
+        // Small delay to make sure everyone is moved in time
+        await new Promise(resolve => setTimeout(resolve, 500));
         if (this._channelB) await this._channelB.delete();
         if (this._channelA) await this._channelA.delete();
         if (this._category) await this._category.delete();
@@ -135,7 +141,7 @@ export class Lobby {
         this._channelA = null;
         this._category = null;
         this._channelIds = [];
-        this.state = LobbyState.Balanced;
+        this._state = LobbyState.Balanced;
     }
 
     public async update() {
@@ -152,7 +158,7 @@ export class Lobby {
                 components: [lobbyButtons],
             });
 
-            // This should not be added to _collectors
+            // This should not be added to _balanceCollectors
             const collector = this._message.createMessageComponentCollector({
                 filter: m => parseButtonId(m.customId).ownerId === this.owner.id,
             });
@@ -193,14 +199,6 @@ export class Lobby {
         return this._state;
     }
 
-    private set state(state: LobbyState) {
-        if (state === LobbyState.Waiting) {
-            this._collectors.map(collector => collector.stop());
-            this._collectors = [];
-        }
-        this._state = state;
-    }
-
     public get channelIds(): Snowflake[] {
         return this._channelIds;
     }
@@ -221,8 +219,13 @@ export class Lobby {
         return this._players.size;
     }
 
-    public addCollector(collector: InteractionCollector<any>) {
-        this._collectors.push(collector);
+    public addBalanceCollector(collector: InteractionCollector<any>) {
+        this._balanceCollectors.push(collector);
+    }
+
+    public stopBalanceCollectors() {
+        this._balanceCollectors.map(collector => collector.stop());
+        this._balanceCollectors = [];
     }
 
     public isFull(): boolean {
@@ -251,14 +254,16 @@ export class Lobby {
             );
             return;
         }
+        this.stopBalanceCollectors();
         this._players.set(member.id, member);
-        this.state = LobbyState.Waiting;
+        this._state = LobbyState.Waiting;
     }
 
     public removePlayer(member: GuildMember): void {
         if (this._players.has(member.id)) {
+            this.stopBalanceCollectors();
             this._players.delete(member.id);
-            this.state = LobbyState.Waiting;
+            this._state = LobbyState.Waiting;
         } else {
             this._logger.warn(
                 {
@@ -302,9 +307,15 @@ export class Lobby {
 
         this._teamA = teamA;
         this._teamB = teamB;
-        this.state = LobbyState.Balanced;
+        this._state = LobbyState.Balanced;
 
         return true;
+    }
+
+    public swapTeams() {
+        const temp = this._teamA;
+        this._teamA = this._teamB;
+        this._teamB = temp;
     }
 
     public teamOf(player: GuildMember): TeamLabel | null {
