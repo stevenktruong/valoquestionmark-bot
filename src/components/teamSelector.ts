@@ -10,7 +10,7 @@ export const getTeamSelector = (lobby: Lobby) =>
         new StringSelectMenuBuilder()
             .setCustomId(getTeamSelectorId(lobby))
             .setPlaceholder("Select players")
-            .setMinValues(MAX_TEAM_SIZE)
+            .setMinValues(1)
             .setMaxValues(MAX_TEAM_SIZE)
             .addOptions(
                 lobby.players.map(member => ({

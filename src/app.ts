@@ -60,8 +60,6 @@ client.on(Events.InteractionCreate, async interaction => {
             return;
         }
 
-        autocompleteLogger.info("Received an autocomplete request.");
-
         try {
             await command.autocomplete(interaction);
         } catch (error) {

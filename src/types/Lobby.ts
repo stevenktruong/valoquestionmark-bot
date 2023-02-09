@@ -262,35 +262,29 @@ export class Lobby {
     }
 
     public makeTeams(teamAIds: Snowflake[], teamBIds: Snowflake[]): void {
-        if (teamAIds.length + teamBIds.length != MAX_LOBBY_SIZE) {
+        let validTeams = true;
+        const invalidIds = [];
+        [teamAIds, teamBIds].forEach(playerIds =>
+            playerIds.forEach(id => {
+                if (!this._players.has(id)) {
+                    invalidIds.push(id);
+                    validTeams = false;
+                }
+            })
+        );
+        if (!validTeams) {
             this._logger.warn(
                 {
                     teams: {
                         teamAIds,
                         teamBIds,
                     },
+                    invalidIds,
                 },
-                "Tried to make teams with fewer than 10 players total."
+                "Tried to make teams with some player ids not in the lobby."
             );
             return;
         }
-
-        let validTeams = true;
-        [teamAIds, teamBIds].forEach(playerIds =>
-            playerIds.forEach(id => {
-                if (!this._players.has(id)) {
-                    this._logger.warn(
-                        {
-                            player: { id },
-                        },
-                        "Tried to assign non-existent player to a team."
-                    );
-                    validTeams = false;
-                    return;
-                }
-            })
-        );
-        if (!validTeams) return;
 
         const teamA = new Team(new Collection(teamAIds.map(id => [id, this._players.get(id)])));
         const teamB = new Team(new Collection(teamBIds.map(id => [id, this._players.get(id)])));
