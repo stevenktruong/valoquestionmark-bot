@@ -8,6 +8,7 @@ import {
     CategoryChannel,
     VoiceChannel,
     Snowflake,
+    InteractionCollector,
 } from "discord.js";
 
 import { Logger } from "pino";
@@ -61,8 +62,8 @@ export class Lobby {
     private _teamA: Team;
     private _teamB: Team;
 
-    // Main message representing the lobby status
-    private _message: Message;
+    private _message: Message; // Main message representing the lobby status
+    private _collectors: InteractionCollector<any>[]; // Active non-button collectors, e.g., from draft picking
 
     // Channels created for the lobby
     private _category: CategoryChannel;
@@ -85,6 +86,7 @@ export class Lobby {
         this._players = new Collection();
         this._teamA = new Team();
         this._teamB = new Team();
+        this._collectors = [];
         this._logger = client.logger.child({
             guild: guild.name,
             owner: owner.displayName,
@@ -93,6 +95,7 @@ export class Lobby {
     }
 
     public async destroy() {
+        await Promise.all(this._collectors.map(collector => collector.stop()));
         if (this._message) await this._message.delete();
         if (this._channelB) await this._channelB.delete();
         if (this._channelA) await this._channelA.delete();
@@ -111,24 +114,18 @@ export class Lobby {
 
         this._channelIds = [this._category.id, this._channelA.id, this._channelB.id];
 
-        try {
-            await Promise.all([
-                ...teamA.players.filter(member => member.voice).map(member => member.voice.setChannel(this._channelA)),
-                ...teamB.players.filter(member => member.voice).map(member => member.voice.setChannel(this._channelB)),
-            ]);
-        } catch (error) {
-            // Ignore errors when moving players since we don't care if it succeeds or not
-        }
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        await Promise.all([
+            ...teamA.players.filter(member => member.voice).map(member => member.voice.setChannel(this._channelA)),
+            ...teamB.players.filter(member => member.voice).map(member => member.voice.setChannel(this._channelB)),
+        ]);
 
-        this._state = LobbyState.Playing;
+        this.state = LobbyState.Playing;
     }
 
     public async stop(channel: VoiceChannel) {
-        try {
-            await Promise.all(this._category.members.map(member => member.voice.setChannel(channel)));
-        } catch (error) {
-            // Ignore errors when moving players since we don't care if it succeeds or not
-        }
+        await Promise.all(this._category.members.map(member => member.voice.setChannel(channel)));
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
         if (this._channelB) await this._channelB.delete();
         if (this._channelA) await this._channelA.delete();
@@ -138,7 +135,7 @@ export class Lobby {
         this._channelA = null;
         this._category = null;
         this._channelIds = [];
-        this._state = LobbyState.Balanced;
+        this.state = LobbyState.Balanced;
     }
 
     public async update() {
@@ -155,6 +152,7 @@ export class Lobby {
                 components: [lobbyButtons],
             });
 
+            // This should not be added to _collectors
             const collector = this._message.createMessageComponentCollector({
                 filter: m => parseButtonId(m.customId).ownerId === this.owner.id,
             });
@@ -191,19 +189,27 @@ export class Lobby {
         }
     }
 
-    get state(): LobbyState {
+    public get state(): LobbyState {
         return this._state;
     }
 
-    get channelIds(): Snowflake[] {
+    private set state(state: LobbyState) {
+        if (state === LobbyState.Waiting) {
+            this._collectors.map(collector => collector.stop());
+            this._collectors = [];
+        }
+        this._state = state;
+    }
+
+    public get channelIds(): Snowflake[] {
         return this._channelIds;
     }
 
-    get players(): GuildMember[] {
+    public get players(): GuildMember[] {
         return this._players.map(member => member);
     }
 
-    get teams() {
+    public get teams() {
         // TODO: Make sure these are immutable
         return {
             teamA: this._teamA,
@@ -211,8 +217,12 @@ export class Lobby {
         };
     }
 
-    get size(): number {
+    public get size(): number {
         return this._players.size;
+    }
+
+    public addCollector(collector: InteractionCollector<any>) {
+        this._collectors.push(collector);
     }
 
     public isFull(): boolean {
@@ -242,13 +252,13 @@ export class Lobby {
             return;
         }
         this._players.set(member.id, member);
-        this._state = LobbyState.Waiting;
+        this.state = LobbyState.Waiting;
     }
 
     public removePlayer(member: GuildMember): void {
         if (this._players.has(member.id)) {
             this._players.delete(member.id);
-            this._state = LobbyState.Waiting;
+            this.state = LobbyState.Waiting;
         } else {
             this._logger.warn(
                 {
@@ -262,7 +272,7 @@ export class Lobby {
         }
     }
 
-    public makeTeams(teamAIds: Snowflake[], teamBIds: Snowflake[]): void {
+    public makeTeams(teamAIds: Snowflake[], teamBIds: Snowflake[]): boolean {
         let validTeams = true;
         const invalidIds = [];
         [teamAIds, teamBIds].forEach(playerIds =>
@@ -284,7 +294,7 @@ export class Lobby {
                 },
                 "Tried to make teams with some player ids not in the lobby."
             );
-            return;
+            return false;
         }
 
         const teamA = new Team(new Collection(teamAIds.map(id => [id, this._players.get(id)])));
@@ -292,7 +302,9 @@ export class Lobby {
 
         this._teamA = teamA;
         this._teamB = teamB;
-        this._state = LobbyState.Balanced;
+        this.state = LobbyState.Balanced;
+
+        return true;
     }
 
     public teamOf(player: GuildMember): TeamLabel | null {

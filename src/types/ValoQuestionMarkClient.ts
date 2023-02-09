@@ -40,23 +40,23 @@ export class ValoQuestionMarkClient extends Client {
         this._logger = logger;
     }
 
-    get commands() {
+    public get commands() {
         return this._commands;
     }
 
-    get buttons() {
+    public get buttons() {
         return this._buttons;
     }
 
-    get balanceStrategies() {
+    public get balanceStrategies() {
         return this._balanceStrategies;
     }
 
-    get lobbies() {
+    public get lobbies() {
         return this._lobbies;
     }
 
-    get logger() {
+    public get logger() {
         return this._logger;
     }
 

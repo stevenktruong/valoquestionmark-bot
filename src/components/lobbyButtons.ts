@@ -15,9 +15,10 @@ export const getLobbyButtons = (lobby: Lobby) =>
             .setCustomId(getButtonId(lobby, ButtonType.Join))
             .setLabel("Join")
             .setStyle(ButtonStyle.Danger)
-            .setDisabled(lobby.state !== LobbyState.Waiting || lobby.isFull()),
+            .setDisabled(lobby.state === LobbyState.Playing || lobby.isFull()),
         new ButtonBuilder()
             .setCustomId(getButtonId(lobby, ButtonType.Leave))
             .setLabel("Leave")
             .setStyle(ButtonStyle.Secondary)
+            .setDisabled(lobby.state === LobbyState.Playing)
     );

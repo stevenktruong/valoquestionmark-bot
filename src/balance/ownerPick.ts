@@ -1,5 +1,6 @@
 import { ChatInputCommandInteraction } from "discord.js";
 
+import { makeTeamsFailedReply } from "checks";
 import { getTeamSelector, getTeamSelectorId } from "components/teamSelector";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 
@@ -12,7 +13,13 @@ export const handleOwnerPick = async (interaction: ChatInputCommandInteraction) 
         ephemeral: true,
     });
 
-    await message.awaitMessageComponent({ filter: m => m.customId === getTeamSelectorId(lobby) }).then(async i => {
+    const collector = message.createMessageComponentCollector({
+        filter: m => m.customId === getTeamSelectorId(lobby),
+        max: 1,
+    });
+    lobby.addCollector(collector);
+
+    collector.on("collect", async i => {
         if (!i.isStringSelectMenu()) {
             client.logger.error(
                 {
@@ -28,9 +35,12 @@ export const handleOwnerPick = async (interaction: ChatInputCommandInteraction) 
         }
 
         lobby.resetTeams();
-        const playerIdsA = i.values;
-        const playerIdsB = lobby.players.filter(member => !i.values.includes(member.id)).map(member => member.id);
-        lobby.makeTeams(playerIdsA, playerIdsB);
+        const teamAIds = i.values;
+        const teamBIds = lobby.players.filter(member => !i.values.includes(member.id)).map(member => member.id);
+        if (!lobby.makeTeams(teamAIds, teamBIds)) {
+            await makeTeamsFailedReply(i);
+            return;
+        }
 
         await i.update({
             content:
@@ -38,5 +48,13 @@ export const handleOwnerPick = async (interaction: ChatInputCommandInteraction) 
             components: [],
         });
         await lobby.update();
+    });
+
+    collector.on("end", async collected => {
+        if (collected.size > 0) return;
+        await interaction.editReply({
+            content: "Aborting since someone joined or left during balancing. You can run `/balance` to try again.",
+            components: [],
+        });
     });
 };

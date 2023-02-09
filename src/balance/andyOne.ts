@@ -2,6 +2,7 @@ import { ChatInputCommandInteraction } from "discord.js";
 
 import { spawn } from "child_process";
 
+import { makeTeamsFailedReply } from "checks";
 import { getIdFromPlayer, getPlayerFromId } from "players";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 
@@ -52,7 +53,7 @@ export const handleAndyOne = async (interaction: ChatInputCommandInteraction) =>
     const teamBIds = teamBNames.map(getIdFromPlayer);
 
     lobby.resetTeams();
-    lobby.makeTeams(teamAIds, teamBIds);
+    if (!lobby.makeTeams(teamAIds, teamBIds)) return makeTeamsFailedReply(interaction);
 
     await interaction.followUp({
         content:
