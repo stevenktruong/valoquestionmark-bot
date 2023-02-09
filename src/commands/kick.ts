@@ -1,5 +1,6 @@
 import { AutocompleteInteraction, ChatInputCommandInteraction, SlashCommandBuilder, Snowflake } from "discord.js";
 
+import { noLobbyReply } from "checks";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 
 const PLAYER = "player";
@@ -14,13 +15,7 @@ export default {
     execute: async (interaction: ChatInputCommandInteraction) => {
         const client: ValoQuestionMarkClient = interaction.client as ValoQuestionMarkClient;
         const lobby = client.lobbies.get(interaction.user.id);
-        if (!lobby) {
-            await interaction.reply({
-                content: "You don't have a customs lobby",
-                ephemeral: true,
-            });
-            return;
-        }
+        if (!lobby) return noLobbyReply(interaction);
 
         const id = interaction.options.get(PLAYER, true).value as Snowflake;
         const player = lobby.getPlayer(id);

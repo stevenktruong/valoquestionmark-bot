@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
 
-import { noLobby } from "checks";
+import { noLobbyReply } from "checks";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 
 export default {
@@ -8,7 +8,7 @@ export default {
     execute: async (interaction: ChatInputCommandInteraction) => {
         const client: ValoQuestionMarkClient = interaction.client as ValoQuestionMarkClient;
         const lobby = client.lobbies.get(interaction.user.id);
-        if (!lobby) return await noLobby(interaction);
+        if (!lobby) return await noLobbyReply(interaction);
 
         const { teamA, teamB } = lobby.teams;
         if (teamA.players.size == 0 || teamB.players.size == 0) {

@@ -26,7 +26,6 @@ process.on("SIGTERM", async () => {
     process.exit();
 });
 
-// Handle commands
 client.on(Events.InteractionCreate, async interaction => {
     if (interaction.isChatInputCommand()) {
         const command = client.commands.get(interaction.commandName);

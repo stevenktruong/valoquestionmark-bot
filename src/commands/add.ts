@@ -1,6 +1,6 @@
 import { AutocompleteInteraction, ChatInputCommandInteraction, SlashCommandBuilder, Snowflake } from "discord.js";
 
-import { noLobby } from "checks";
+import { noLobbyReply } from "checks";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 
 const PLAYER = "player";
@@ -15,13 +15,21 @@ export default {
     execute: async (interaction: ChatInputCommandInteraction) => {
         const client: ValoQuestionMarkClient = interaction.client as ValoQuestionMarkClient;
         const lobby = client.lobbies.get(interaction.user.id);
-        if (!lobby) return await noLobby(interaction);
+        if (!lobby) return await noLobbyReply(interaction);
 
         const id = interaction.options.get(PLAYER, true).value as Snowflake;
         const member = lobby.guild.members.cache.get(id);
         if (!member) {
             await interaction.reply({
                 content: "That member isn't in your server!",
+                ephemeral: true,
+            });
+            return;
+        }
+
+        if (member.user.bot) {
+            await interaction.reply({
+                content: "You can't add bots to your lobby!",
                 ephemeral: true,
             });
             return;
@@ -36,11 +44,10 @@ export default {
         await lobby.update();
     },
     autocomplete: async (interaction: AutocompleteInteraction) => {
-        const client = interaction.client as ValoQuestionMarkClient;
         const focusedValue = interaction.options.getFocused();
         await interaction.respond(
             interaction.guild.members.cache
-                .filter(member => member.id != client.user.id)
+                .filter(member => !member.user.bot)
                 .filter(member => member.displayName.startsWith(focusedValue))
                 .map(member => ({
                     name: member.displayName,
