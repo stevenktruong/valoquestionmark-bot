@@ -22,6 +22,7 @@
     },
     "scripts": {
         "start": "nodemon --signal SIGINT --exec ts-node src/app.ts",
-        "deploy": "ts-node scripts/deploy-commands.ts"
+        "deploy": "ts-node scripts/deploy-commands.ts",
+        "url": "ts-node scripts/generate-url.ts"
     }
 }
