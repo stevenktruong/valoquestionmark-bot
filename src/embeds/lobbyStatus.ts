@@ -30,7 +30,13 @@ export const getLobbyStatus = (lobby: Lobby) => {
                           name: "🗡️ Attackers",
                           value:
                               teamA.players.size > 0
-                                  ? teamA.players.map(member => `${member.displayName}`).join("\n")
+                                  ? teamA.players
+                                        .map(member =>
+                                            teamA.captain && teamA.captain.id === member.id
+                                                ? `${member.displayName} 👑`
+                                                : `${member.displayName}`
+                                        )
+                                        .join("\n")
                                   : "\u200b",
                           inline: true,
                       },
@@ -38,7 +44,13 @@ export const getLobbyStatus = (lobby: Lobby) => {
                           name: "🛡️ Defenders",
                           value:
                               teamB.players.size > 0
-                                  ? teamB.players.map(member => `${member.displayName}`).join("\n")
+                                  ? teamB.players
+                                        .map(member =>
+                                            teamB.captain && teamB.captain.id === member.id
+                                                ? `${member.displayName} 👑`
+                                                : `${member.displayName}`
+                                        )
+                                        .join("\n")
                                   : "\u200b",
                           inline: true,
                       },

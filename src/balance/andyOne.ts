@@ -66,7 +66,7 @@ export const handleAndyOne = async (interaction: ChatInputCommandInteraction) =>
                     interaction: {
                         customId: i.customId,
                         interactionId: i.id,
-                        user: interaction.user.username,
+                        user: i.user.username,
                     },
                 },
                 "Non-selector interaction had the custom id of a selector."

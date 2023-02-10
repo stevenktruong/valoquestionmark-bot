@@ -31,7 +31,7 @@ def minimize_score_delta(players: list[str], map: str = None):
         data = json.load(f)
         if map:
             for player_name in PLAYER_NAMES:
-                acs[player_name] = data[player_name][MAPS][map][SCORE]
+                acs[player_name] = data[player_name][MAPS][map][ACS]
         else:
             for player_name in PLAYER_NAMES:
                 score = 0
