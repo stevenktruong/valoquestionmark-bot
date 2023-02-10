@@ -10,23 +10,31 @@ const STRATEGY = "strategy";
 export default {
     data: new SlashCommandBuilder()
         .setName("balance")
-        .setDescription("Start picking teams in your lobby")
+        .setDescription("Pick teams in your lobby")
         .addStringOption(option =>
             option
                 .setName(STRATEGY)
-                .setDescription("?")
+                .setDescription("Method to use to pick teams")
                 .addChoices(
                     {
                         name: "Pick attackers manually",
                         value: BalanceStrategy.OwnerPick,
                     },
+                    // {
+                    //     name: "Pick team captains",
+                    //     value: BalanceStrategy.DraftPick,
+                    // },
                     {
-                        name: "Andy algorithm 1",
+                        name: "Predicted ACS synergy by map",
                         value: BalanceStrategy.AndyOne,
                     },
                     {
-                        name: "Andy algorithm 2",
+                        name: "Automatic snake draft (based on impact)",
                         value: BalanceStrategy.AndyTwo,
+                    },
+                    {
+                        name: "Automatic snake draft (based on map ACS)",
+                        value: BalanceStrategy.AndyThree,
                     }
                 )
                 .setRequired(true)
@@ -52,6 +60,8 @@ export default {
             });
             return;
         }
+
+        lobby.resetBalancing();
 
         const handler = client.balanceStrategies.get(balanceStrategy);
         try {
