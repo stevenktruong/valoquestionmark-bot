@@ -22,10 +22,9 @@ export const handleOwnerPick = async (interaction: ChatInputCommandInteraction) 
     collector.on("end", async collected => {
         const i = collected.first();
         if (!i) {
-            // If it didn't collect anything, then the collector ended because the players changed
+            // If it didn't collect anything, then the collector ended because the players changed or a different balancing strategy was chosen.
             await interaction.editReply({
-                content:
-                    "Canceling since someone joined or left during balancing. You can run `/balance` to try again.",
+                content: "Canceling either because players changed or you ran `/balance` again.",
                 components: [],
             });
             return;
@@ -37,7 +36,7 @@ export const handleOwnerPick = async (interaction: ChatInputCommandInteraction) 
                     interaction: {
                         customId: i.customId,
                         interactionId: i.id,
-                        user: interaction.user.username,
+                        user: i.user.username,
                     },
                 },
                 "Non-selector interaction had the custom id of a selector."
@@ -53,7 +52,7 @@ export const handleOwnerPick = async (interaction: ChatInputCommandInteraction) 
             return;
         }
 
-        await i.update({
+        await i.editReply({
             content:
                 "Teams are picked! Run `/start` to move everyone to their own channel. If you need to make changes to the teams, run `/balance` again.",
             components: [],

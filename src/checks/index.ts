@@ -14,8 +14,8 @@ export const makeTeamsFailedReply = async (interaction: ChatInputCommandInteract
 
     if (interaction.deferred) {
         await interaction.followUp(payload);
-    } else if (interaction.replied && interaction.isStringSelectMenu()) {
-        await interaction.update(payload);
+    } else if (interaction.replied) {
+        await interaction.editReply(payload);
     } else {
         await interaction.reply(payload);
     }

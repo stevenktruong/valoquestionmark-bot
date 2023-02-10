@@ -96,7 +96,7 @@ export class Lobby {
     }
 
     public async destroy() {
-        this.stopBalanceCollectors();
+        this._balanceCollectors.map(collector => collector.stop());
         if (this._message) await this._message.delete();
         if (this._channelB) await this._channelB.delete();
         if (this._channelA) await this._channelA.delete();
@@ -224,9 +224,10 @@ export class Lobby {
         this._balanceCollectors.push(collector);
     }
 
-    public stopBalanceCollectors() {
+    public resetBalancing() {
         this._balanceCollectors.map(collector => collector.stop());
         this._balanceCollectors = [];
+        this._state = LobbyState.Waiting;
     }
 
     public isFull(): boolean {
@@ -255,14 +256,14 @@ export class Lobby {
             );
             return;
         }
-        this.stopBalanceCollectors();
+        this.resetBalancing();
         this._players.set(member.id, member);
         this._state = LobbyState.Waiting;
     }
 
     public removePlayer(member: GuildMember): void {
         if (this._players.has(member.id)) {
-            this.stopBalanceCollectors();
+            this.resetBalancing();
             this._players.delete(member.id);
             this._state = LobbyState.Waiting;
         } else {

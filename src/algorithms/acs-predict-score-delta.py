@@ -25,18 +25,22 @@ def train():
     xgb_model.save_model(os.path.join(models_dir, "acs-predict-score-delta.json"))
 
 
-def minimize_score_delta(players: list[str]):
+def minimize_score_delta(players: list[str], map: str = None):
     acs = {player_name + "_acs": 0 for player_name in PLAYER_NAMES}
     with open(os.path.join(data_dir, "individual.json"), mode="r") as f:
         data = json.load(f)
-        for player_name in PLAYER_NAMES:
-            score = 0
-            rounds = 0
-            for map in MAP_NAMES:
-                score += data[player_name][MAPS][map][SCORE]
-                rounds += data[player_name][MAPS][map][ROUNDS]
-            if rounds > 0:
-                acs[player_name] = round(score / rounds)
+        if map:
+            for player_name in PLAYER_NAMES:
+                acs[player_name] = data[player_name][MAPS][map][SCORE]
+        else:
+            for player_name in PLAYER_NAMES:
+                score = 0
+                rounds = 0
+                for map in MAP_NAMES:
+                    score += data[player_name][MAPS][map][SCORE]
+                    rounds += data[player_name][MAPS][map][ROUNDS]
+                if rounds > 0:
+                    acs[player_name] = round(score / rounds)
         f.close()
 
     xgb_model = XGBRegressor()
@@ -72,11 +76,17 @@ if __name__ == "__main__":
     if len(sys.argv) == 1 or sys.argv[1] == "--train":
         train()
     elif sys.argv[1] == "--balance":
-        players = sys.argv[2:]
+        if len(sys.argv[2:]) == 11:
+            map = sys.argv[2]
+            players = sys.argv[3:]
+        else:
+            map = None
+            player = sys.argv[2:]
+
         if len(players) != 10:
             print("You need 10 players to balance", file=sys.stderr)
             sys.exit(1)
-        print(json.dumps(minimize_score_delta(players)), file=sys.stdout)
+        print(json.dumps(minimize_score_delta(players, map)), file=sys.stdout)
     else:
         print(f"'{sys.argv[1]}' is not a valid command", file=sys.stderr)
         sys.exit(1)
