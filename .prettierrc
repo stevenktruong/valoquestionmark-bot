@@ -6,6 +6,7 @@
         "^discord.js$",
         "<THIRD_PARTY_MODULES>",
         "^(algorithms|balance|buttons|checks|commands|components|embeds|logger|players|types).*$",
+        "^data.*$",
         "^[./]"
     ],
     "importOrderSeparation": true
