@@ -51,8 +51,7 @@ export const handleAndyThree = async (interaction: ChatInputCommandInteraction) 
         if (!i) {
             // If it didn't collect anything, then the collector ended because the players changed
             await interaction.editReply({
-                content:
-                    "Canceling since someone joined or left during balancing. You can run `/balance` to try again.",
+                content: "Canceling either because players changed or you ran `/balance` again.",
                 components: [],
             });
             return;

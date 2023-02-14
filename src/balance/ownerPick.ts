@@ -52,7 +52,7 @@ export const handleOwnerPick = async (interaction: ChatInputCommandInteraction) 
             return;
         }
 
-        await i.editReply({
+        await i.update({
             content:
                 "Teams are picked! Run `/start` to move everyone to their own channel. If you need to make changes to the teams, run `/balance` again.",
             components: [],

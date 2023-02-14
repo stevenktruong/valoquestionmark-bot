@@ -1,5 +1,7 @@
 import pino from "pino";
 
+Error.stackTraceLimit = 20;
+
 export default pino({
     base: {
         pid: undefined,

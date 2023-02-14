@@ -115,8 +115,12 @@ export class Lobby {
         this._channelIds = [this._category.id, this._channelA.id, this._channelB.id];
 
         await Promise.all([
-            ...teamA.players.filter(member => member.voice).map(member => member.voice.setChannel(this._channelA)),
-            ...teamB.players.filter(member => member.voice).map(member => member.voice.setChannel(this._channelB)),
+            ...teamA.players
+                .filter(member => member.voice && member.voice.channel)
+                .map(member => member.voice.setChannel(this._channelA)),
+            ...teamB.players
+                .filter(member => member.voice && member.voice.channel)
+                .map(member => member.voice.setChannel(this._channelB)),
         ]);
 
         this._state = LobbyState.Playing;
@@ -125,7 +129,7 @@ export class Lobby {
     public async stop(channel: VoiceChannel) {
         await Promise.all(
             this._category.members
-                .filter(member => member.voice && member.voice.channelId)
+                .filter(member => member.voice && member.voice.channel)
                 .map(member => member.voice.setChannel(channel))
         );
 
