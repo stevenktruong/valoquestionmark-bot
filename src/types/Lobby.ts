@@ -12,7 +12,6 @@ import {
 } from "discord.js";
 
 import { Logger } from "pino";
-import { wait } from "utils";
 
 import { parseButtonId, getLobbyButtons } from "components/lobbyButtons";
 import { getLobbyStatus } from "embeds/lobbyStatus";
@@ -132,11 +131,6 @@ export class Lobby {
                 .filter(member => member.voice && member.voice.channel)
                 .map(member => member.voice.setChannel(channel))
         );
-
-        // TODO: Exponential backoff?
-        while (this._channelA.members.size > 0 || this._channelB.members.size > 0) {
-            await wait(250);
-        }
 
         if (this._channelB) await this._channelB.delete();
         if (this._channelA) await this._channelA.delete();

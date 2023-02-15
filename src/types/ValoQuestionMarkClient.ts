@@ -30,7 +30,7 @@ export class ValoQuestionMarkClient extends Client {
         buttons: Collection<ButtonType, ButtonHandler>,
         balanceStrategies: Collection<BalanceStrategy, BalanceStrategyHandler>
     ) {
-        super({ intents: [GatewayIntentBits.Guilds] });
+        super({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] });
 
         this._commands = commands;
         this._buttons = buttons;
