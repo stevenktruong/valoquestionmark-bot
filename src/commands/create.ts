@@ -36,10 +36,11 @@ export default {
             await interaction.reply({ content: "You already created a lobby", ephemeral: true });
             return;
         }
+        lobby.addPlayer(member);
 
         await interaction.reply({
             content:
-                "Successfully created a lobby!" +
+                "Successfully created a lobby! If you're not playing, you can leave by clicking the `Leave` button." +
                 "\n- Once everyone joins, run `/balance` to pick teams." +
                 "\n- You can manually add and remove players with `/add` and `/remove`, respectively.",
             ephemeral: true,
