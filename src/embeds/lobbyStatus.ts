@@ -24,7 +24,7 @@ export const getLobbyStatus = (lobby: Lobby) => {
             })()
         )
         .addFields(
-            ...(lobby.state === LobbyState.Balanced
+            ...(lobby.state === LobbyState.Balanced || lobby.state === LobbyState.Playing
                 ? [
                       {
                           name: "🗡️ Attackers",

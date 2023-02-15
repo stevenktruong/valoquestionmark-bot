@@ -74,6 +74,10 @@ export const handleAndyOne = async (interaction: ChatInputCommandInteraction) =>
         }
 
         await i.deferUpdate();
+        await i.editReply({
+            content: "Balancing... 🤔",
+            components: [],
+        });
         const mapName = i.values[0];
         const python = spawn(pythonPath, [scriptPath, "--balance", mapName, ...players]);
         const { teamANames, teamBNames } = await new Promise<{ teamANames: string[]; teamBNames: string[] }>(

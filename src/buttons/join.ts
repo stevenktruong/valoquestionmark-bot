@@ -1,7 +1,7 @@
 import { ButtonInteraction, GuildMember } from "discord.js";
 
 import { parseButtonId } from "components/lobbyButtons";
-// import { discordIdToPlayer } from "players";
+import { discordIdToPlayer } from "players";
 import { MAX_LOBBY_SIZE } from "types/Lobby";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 
@@ -19,19 +19,22 @@ export const handleJoin = async (interaction: ButtonInteraction) => {
         lobby.addPlayer(member);
 
         // Dummy users for testing
-        // const dummies = Object.entries(discordIdToPlayer)
-        //     .slice(0, 9)
-        //     .map(
-        //         ([id, player]) =>
-        //             ({
-        //                 ...member,
-        //                 id: id,
-        //                 displayName: player,
-        //             } as GuildMember)
-        //     );
-        // for (const dummy of dummies) {
-        //     lobby.addPlayer(dummy);
-        // }
+        if (ownerId === "120048657679646720" && lobby.guild.id === "811846013656367174") {
+            const dummies = Object.entries(discordIdToPlayer)
+                .slice(0, 9)
+                .map(
+                    ([id, player]) =>
+                        ({
+                            ...member,
+                            id: id,
+                            displayName: player,
+                            voice: null,
+                        } as GuildMember)
+                );
+            for (const dummy of dummies) {
+                lobby.addPlayer(dummy);
+            }
+        }
     }
     await interaction.deferUpdate();
 };
