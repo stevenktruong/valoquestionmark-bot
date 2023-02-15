@@ -32,6 +32,8 @@ def minimize_score_delta(players: list[str], map: str = None):
         if map:
             for player_name in PLAYER_NAMES:
                 acs[player_name] = data[player_name][MAPS][map][ACS]
+                if acs[player_name] is None:
+                    acs[player_name] = 0
         else:
             for player_name in PLAYER_NAMES:
                 score = 0
@@ -41,6 +43,8 @@ def minimize_score_delta(players: list[str], map: str = None):
                     rounds += data[player_name][MAPS][map][ROUNDS]
                 if rounds > 0:
                     acs[player_name] = round(score / rounds)
+                else:
+                    acs[player_name] = 0
         f.close()
 
     xgb_model = XGBRegressor()
@@ -81,7 +85,7 @@ if __name__ == "__main__":
             players = sys.argv[3:]
         else:
             map = None
-            player = sys.argv[2:]
+            players = sys.argv[2:]
 
         if len(players) != 10:
             print("You need 10 players to balance", file=sys.stderr)
