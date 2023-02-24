@@ -21,7 +21,8 @@
         "typescript": "^4.9.4"
     },
     "scripts": {
-        "start": "nodemon --signal SIGINT --exec ts-node src/app.ts",
+        "start": "ts-node --transpile-only src/app.ts",
+        "dev": "nodemon --signal SIGINT --exec ts-node src/app.ts",
         "deploy-commands": "ts-node scripts/deploy-commands.ts",
         "delete-commands": "ts-node scripts/delete-commands.ts",
         "generate-url": "ts-node scripts/generate-url.ts"
