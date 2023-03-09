@@ -5,6 +5,7 @@ import { Command } from "types/ValoQuestionMarkClient";
 import add from "./add";
 import balance from "./balance";
 import create from "./create";
+import dashboard from "./dashboard";
 import _delete from "./delete";
 import refresh from "./refresh";
 import remove from "./remove";
@@ -22,5 +23,6 @@ commands.set("refresh", refresh);
 commands.set("start", start);
 commands.set("stop", stop);
 commands.set("swap", swap);
+commands.set("dashboard", dashboard);
 
 export default commands;
