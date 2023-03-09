@@ -3,6 +3,7 @@ import { Snowflake } from "discord.js";
 export enum Player {
     Andy = "andy",
     Brandon = "brandon",
+    Bree = "bree",
     Brian = "brian",
     Cade = "cade",
     Darwin = "darwin",
@@ -22,6 +23,7 @@ export enum Player {
 export const discordIdToPlayer: Record<Snowflake, Player> = {
     "122974482125160451": Player.Andy,
     "414558194103353347": Player.Brandon,
+    "465012692243972096": Player.Bree,
     "716862437051072613": Player.Brian,
     "159010251604099072": Player.Cade,
     "227628131203284992": Player.Darwin,
@@ -41,6 +43,7 @@ export const discordIdToPlayer: Record<Snowflake, Player> = {
 export const playerToDiscordId: Record<Player, Snowflake> = {
     [Player.Andy]: "122974482125160451",
     [Player.Brandon]: "414558194103353347",
+    [Player.Bree]: "465012692243972096",
     [Player.Brian]: "716862437051072613",
     [Player.Cade]: "159010251604099072",
     [Player.Darwin]: "227628131203284992",

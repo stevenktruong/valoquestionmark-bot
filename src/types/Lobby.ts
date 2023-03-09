@@ -147,7 +147,7 @@ export class Lobby {
         const embed = getLobbyStatus(this);
         const lobbyButtons = getLobbyButtons(this);
         if (this._message) {
-            this._message.edit({
+            await this._message.edit({
                 embeds: [embed],
                 components: [lobbyButtons],
             });
