@@ -7,7 +7,7 @@ import axios from "axios";
 // Prevent axios from raising an error for 4XX HTTP response codes
 axios.defaults.validateStatus = () => true;
 
-const BACKEND_ADD_URL = "https://api.valoquestionmark.com/add";
+const BACKEND_MATCH_ENDPOINT = "https://api.valoquestionmark.com/match";
 const URL = "url";
 
 export default {
@@ -18,8 +18,8 @@ export default {
     execute: async (interaction: ChatInputCommandInteraction) => {
         await interaction.deferReply({ ephemeral: true });
 
-        const response = await axios.putForm(
-            BACKEND_ADD_URL,
+        const response = await axios.postForm(
+            BACKEND_MATCH_ENDPOINT,
             axios.toFormData({ url: interaction.options.get(URL, true).value })
         );
 
