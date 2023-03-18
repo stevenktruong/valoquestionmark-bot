@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction } from "discord.js";
 
-import { makeTeamsFailedReply } from "checks";
+import { updateTeamsFailedReply } from "checks";
 import { getMapSelector, getMapSelectorId } from "components/mapSelector";
 import { getIdFromPlayer, getPlayerFromId } from "players";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
@@ -90,7 +90,7 @@ export const handleAndyThree = async (interaction: ChatInputCommandInteraction) 
         });
 
         lobby.resetTeams();
-        if (!lobby.makeTeams(teamAIds, teamBIds)) return makeTeamsFailedReply(i);
+        if (!lobby.updateTeams(teamAIds, teamBIds)) return updateTeamsFailedReply(i);
 
         await i.editReply({
             content:

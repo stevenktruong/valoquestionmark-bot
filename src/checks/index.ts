@@ -6,7 +6,9 @@ export const noLobbyReply = async (interaction: ChatInputCommandInteraction) =>
         ephemeral: true,
     });
 
-export const makeTeamsFailedReply = async (interaction: ChatInputCommandInteraction | StringSelectMenuInteraction) => {
+export const updateTeamsFailedReply = async (
+    interaction: ChatInputCommandInteraction | StringSelectMenuInteraction
+) => {
     const payload = {
         content: "There was an issue making teams. Someone may have joined or left during balancing.",
         ephemeral: true,

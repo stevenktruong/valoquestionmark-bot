@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, ComponentType, GuildMember, Snowflake } from "discord.js";
 
-import { makeTeamsFailedReply } from "checks";
+import { updateTeamsFailedReply } from "checks";
 import { getCaptainSelector, getCaptainSelectorId } from "components/captainSelector";
 import { getDraftSelector, getDraftSelectorId } from "components/draftSelector";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
@@ -68,8 +68,8 @@ export const handleDraftPick = async (interaction: ChatInputCommandInteraction) 
         const teamAIds = [captains[0].id];
         const teamBIds = [captains[1].id];
 
-        if (!lobby.makeTeams(teamAIds, teamBIds, true)) {
-            await makeTeamsFailedReply(i);
+        if (!lobby.updateTeams(teamAIds, teamBIds, true)) {
+            await updateTeamsFailedReply(i);
             return;
         }
         await lobby.update();
@@ -145,8 +145,8 @@ export const handleDraftPick = async (interaction: ChatInputCommandInteraction) 
                     m.customId === getDraftSelectorId(lobby, currentCaptain) && m.member.id === currentCaptain.id,
             });
 
-            if (!lobby.makeTeams(teamAIds, teamBIds, true)) {
-                await makeTeamsFailedReply(i);
+            if (!lobby.updateTeams(teamAIds, teamBIds, true)) {
+                await updateTeamsFailedReply(i);
                 return;
             }
             await lobby.update();

@@ -285,7 +285,7 @@ export class Lobby {
         }
     }
 
-    public makeTeams(teamAIds: Snowflake[], teamBIds: Snowflake[], withCaptains: boolean = false): boolean {
+    public updateTeams(teamAIds: Snowflake[], teamBIds: Snowflake[], withCaptains: boolean = false): boolean {
         let validTeams = true;
         const invalidIds = [];
         [teamAIds, teamBIds].forEach(playerIds =>

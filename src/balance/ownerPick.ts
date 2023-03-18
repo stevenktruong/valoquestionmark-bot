@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction } from "discord.js";
 
-import { makeTeamsFailedReply } from "checks";
+import { updateTeamsFailedReply } from "checks";
 import { getTeamSelector, getTeamSelectorId } from "components/teamSelector";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 
@@ -47,8 +47,8 @@ export const handleOwnerPick = async (interaction: ChatInputCommandInteraction) 
         lobby.resetTeams();
         const teamAIds = i.values;
         const teamBIds = lobby.players.filter(member => !i.values.includes(member.id)).map(member => member.id);
-        if (!lobby.makeTeams(teamAIds, teamBIds)) {
-            await makeTeamsFailedReply(i);
+        if (!lobby.updateTeams(teamAIds, teamBIds)) {
+            await updateTeamsFailedReply(i);
             return;
         }
 
