@@ -48,6 +48,10 @@ export class Team {
 
     captain?: GuildMember;
     players: GuildMemberCollection;
+
+    public get size() {
+        return this.players.size;
+    }
 }
 
 export class Lobby {
@@ -220,6 +224,10 @@ export class Lobby {
 
     public addBalanceCollector(collector: InteractionCollector<any>) {
         this._balanceCollectors.push(collector);
+        collector.on("end", () => {
+            const i = this._balanceCollectors.indexOf(collector);
+            if (i > -1) this._balanceCollectors.splice(i, 1);
+        });
     }
 
     public resetBalancing() {
@@ -277,7 +285,7 @@ export class Lobby {
         }
     }
 
-    public makeTeams(teamAIds: Snowflake[], teamBIds: Snowflake[]): boolean {
+    public makeTeams(teamAIds: Snowflake[], teamBIds: Snowflake[], withCaptains: boolean = false): boolean {
         let validTeams = true;
         const invalidIds = [];
         [teamAIds, teamBIds].forEach(playerIds =>
@@ -302,11 +310,18 @@ export class Lobby {
             return false;
         }
 
-        const teamA = new Team(new Collection(teamAIds.map(id => [id, this._players.get(id)])));
-        const teamB = new Team(new Collection(teamBIds.map(id => [id, this._players.get(id)])));
+        const teamAPlayers = teamAIds.map(id => this._players.get(id));
+        const teamBPlayers = teamBIds.map(id => this._players.get(id));
 
-        this._teamA = teamA;
-        this._teamB = teamB;
+        let teamACaptain = null;
+        let teamBCaptain = null;
+        if (withCaptains) {
+            teamACaptain = teamAPlayers[0];
+            teamBCaptain = teamBPlayers[0];
+        }
+
+        this._teamA = new Team(new Collection(teamAPlayers.map(player => [player.id, player])), teamACaptain);
+        this._teamB = new Team(new Collection(teamBPlayers.map(player => [player.id, player])), teamBCaptain);
         this._state = LobbyState.Balanced;
 
         return true;

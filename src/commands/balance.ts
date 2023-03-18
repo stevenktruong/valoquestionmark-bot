@@ -20,10 +20,10 @@ export default {
                         name: "Pick attackers manually",
                         value: BalanceStrategy.OwnerPick,
                     },
-                    // {
-                    //     name: "Pick team captains",
-                    //     value: BalanceStrategy.DraftPick,
-                    // },
+                    {
+                        name: "Pick team captains",
+                        value: BalanceStrategy.DraftPick,
+                    },
                     {
                         name: "Predicted ACS synergy by map",
                         value: BalanceStrategy.AndyOne,

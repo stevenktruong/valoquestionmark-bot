@@ -1,6 +1,6 @@
 import { EmbedBuilder } from "discord.js";
 
-import { Lobby, LobbyState, MAX_LOBBY_SIZE } from "types/Lobby";
+import { Lobby, LobbyState, MAX_LOBBY_SIZE, Team } from "types/Lobby";
 
 export const getLobbyStatus = (lobby: Lobby) => {
     const { teamA, teamB } = lobby.teams;
@@ -24,47 +24,52 @@ export const getLobbyStatus = (lobby: Lobby) => {
             })()
         )
         .addFields(
-            ...(lobby.state === LobbyState.Balanced || lobby.state === LobbyState.Playing
-                ? [
-                      {
-                          name: "🗡️ Attackers",
-                          value:
-                              teamA.players.size > 0
-                                  ? teamA.players
-                                        .map(member =>
-                                            teamA.captain && teamA.captain.id === member.id
-                                                ? `${member.displayName} 👑`
-                                                : `${member.displayName}`
-                                        )
-                                        .join("\n")
-                                  : "\u200b",
-                          inline: true,
-                      },
-                      {
-                          name: "🛡️ Defenders",
-                          value:
-                              teamB.players.size > 0
-                                  ? teamB.players
-                                        .map(member =>
-                                            teamB.captain && teamB.captain.id === member.id
-                                                ? `${member.displayName} 👑`
-                                                : `${member.displayName}`
-                                        )
-                                        .join("\n")
-                                  : "\u200b",
-                          inline: true,
-                      },
-                  ]
-                : [
-                      {
-                          name: `👥 Players (${lobby.size}/${MAX_LOBBY_SIZE})`,
-                          value: lobby.size > 0 ? lobby.players.map(member => member.displayName).join("\n") : "\u200b",
-                      },
-                  ]),
-            {
-                name: "\u200b",
-                value: "🤓👉 [Dashboard](https://www.valoquestionmark.com/)",
-            }
+            ...(() => {
+                const fields = [];
+                if (teamA.size > 0 || teamB.size > 0) {
+                    fields.push(teamField(teamA, "🗡️ Attackers"), teamField(teamB, "🛡️ Defenders"));
+                }
+
+                if (teamA.size == 0 && teamB.size == 0) {
+                    fields.push({
+                        name: `👥 Players (${lobby.size}/${MAX_LOBBY_SIZE})`,
+                        value: lobby.size > 0 ? lobby.players.map(member => member.displayName).join("\n") : "\u200b",
+                    });
+                } else if (teamA.size + teamB.size < MAX_LOBBY_SIZE) {
+                    fields.push({
+                        name: "👥 Remaining Players",
+                        value:
+                            lobby.size > 0
+                                ? lobby.players
+                                      .filter(member => !(teamA.players.has(member.id) || teamB.players.has(member.id)))
+                                      .map(member => member.displayName)
+                                      .join("\n")
+                                : "\u200b",
+                    });
+                }
+
+                fields.push({
+                    name: "\u200b",
+                    value: "🤓👉 [Dashboard](https://www.valoquestionmark.com/)",
+                });
+
+                return fields;
+            })()
         )
         .setTimestamp();
 };
+
+const teamField = (team: Team, name: string) => ({
+    name: "🗡️ Attackers",
+    value:
+        team.players.size > 0
+            ? team.players
+                  .map(member =>
+                      team.captain && team.captain.id === member.id
+                          ? `${member.displayName} 👑`
+                          : `${member.displayName}`
+                  )
+                  .join("\n")
+            : "\u200b",
+    inline: true,
+});
