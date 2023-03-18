@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 
 import balanceStrategies from "balance";
 import buttonHandlers from "buttons";
-import commands from "commands";
+import commands, { CommandName } from "commands";
 import logger from "logger";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
 
@@ -28,16 +28,18 @@ process.on("SIGINT", async () => {
 
 client.on(Events.InteractionCreate, async interaction => {
     if (interaction.isChatInputCommand()) {
-        const command = client.commands.get(interaction.commandName);
+        const commandName = interaction.commandName as CommandName;
+        if (!commandName) {
+            logger.info(`Received an invalid slash command: /${commandName}`);
+            return;
+        }
+
+        const command = commands.get(commandName);
         const commandLogger = client.logger.child({
             guild: interaction.guild.name,
             user: interaction.user.username,
             command: interaction.toString(),
         });
-        if (!command) {
-            commandLogger.warn("Received an invalid slash command.");
-            return;
-        }
 
         commandLogger.info("Received a slash command.");
 
@@ -48,17 +50,18 @@ client.on(Events.InteractionCreate, async interaction => {
             await interaction.reply({ content: "There was an error while executing this command!", ephemeral: true });
         }
     } else if (interaction.isAutocomplete()) {
-        const command = client.commands.get(interaction.commandName);
+        const commandName = interaction.commandName as CommandName;
+        if (!commandName) {
+            logger.info(`Received an invalid autocomplete request: /${commandName}`);
+            return;
+        }
+
+        const command = client.commands.get(commandName);
         const autocompleteLogger = client.logger.child({
             guild: interaction.guild.name,
             user: interaction.user.username,
             command: `/${interaction.commandName}`,
         });
-
-        if (!command) {
-            autocompleteLogger.info("Received an invalid autocomplete request.");
-            return;
-        }
 
         try {
             await command.autocomplete(interaction);

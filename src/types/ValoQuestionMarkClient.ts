@@ -11,24 +11,25 @@ import {
 
 import { Logger } from "pino";
 
-import { BalanceStrategy } from "balance";
+import { BalanceStrategyName } from "balance";
 import { ButtonName } from "buttons";
+import { CommandName } from "commands";
 import logger from "logger";
 
 import { Lobby } from "./Lobby";
 
 export class ValoQuestionMarkClient extends Client {
-    private _commands: Collection<string, Command>;
+    private _commands: Collection<CommandName, CommandHandler>;
     private _buttons: Collection<ButtonName, ButtonHandler>;
-    private _balanceStrategies: Collection<BalanceStrategy, BalanceStrategyHandler>;
+    private _balanceStrategies: Collection<BalanceStrategyName, BalanceStrategyHandler>;
     private _lobbies: Collection<Snowflake, Lobby>;
 
     private _logger: Logger;
 
     public constructor(
-        commands: Collection<string, Command>,
+        commands: Collection<CommandName, CommandHandler>,
         buttons: Collection<ButtonName, ButtonHandler>,
-        balanceStrategies: Collection<BalanceStrategy, BalanceStrategyHandler>
+        balanceStrategies: Collection<BalanceStrategyName, BalanceStrategyHandler>
     ) {
         super({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] });
 
@@ -71,7 +72,7 @@ export class ValoQuestionMarkClient extends Client {
     }
 }
 
-export interface Command {
+export interface CommandHandler {
     data: any;
     execute: (interaction: ChatInputCommandInteraction) => unknown;
     autocomplete?: (interaction: AutocompleteInteraction) => unknown;

@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
 
-import { BalanceStrategy } from "balance";
+import { BalanceStrategyName } from "balance";
 import { noLobbyReply } from "checks";
 import { LobbyState } from "types/Lobby";
 import { ValoQuestionMarkClient } from "types/ValoQuestionMarkClient";
@@ -18,23 +18,23 @@ export default {
                 .addChoices(
                     {
                         name: "Pick attackers manually",
-                        value: BalanceStrategy.OwnerPick,
+                        value: BalanceStrategyName.OwnerPick,
                     },
                     {
                         name: "Pick team captains",
-                        value: BalanceStrategy.DraftPick,
+                        value: BalanceStrategyName.DraftPick,
                     },
                     {
                         name: "Predicted ACS synergy by map",
-                        value: BalanceStrategy.AndyOne,
+                        value: BalanceStrategyName.AndyOne,
                     },
                     {
                         name: "Automatic snake draft (based on impact)",
-                        value: BalanceStrategy.AndyTwo,
+                        value: BalanceStrategyName.AndyTwo,
                     },
                     {
                         name: "Automatic snake draft (based on map ACS)",
-                        value: BalanceStrategy.AndyThree,
+                        value: BalanceStrategyName.AndyThree,
                     }
                 )
                 .setRequired(true)
@@ -42,7 +42,7 @@ export default {
     execute: async (interaction: ChatInputCommandInteraction) => {
         const client: ValoQuestionMarkClient = interaction.client as ValoQuestionMarkClient;
         const lobby = client.lobbies.get(interaction.user.id);
-        const balanceStrategy = interaction.options.getString(STRATEGY) as BalanceStrategy;
+        const balanceStrategy = interaction.options.getString(STRATEGY) as BalanceStrategyName;
         if (!lobby) return await noLobbyReply(interaction);
 
         if (lobby.size == 0) {
