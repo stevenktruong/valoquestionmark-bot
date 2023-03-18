@@ -1,23 +1,23 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 
-import { ButtonType } from "buttons";
+import { ButtonName } from "buttons";
 import { Lobby, LobbyState } from "types/Lobby";
 
-export const getButtonId = (lobby: Lobby, buttonType: ButtonType) => `${lobby.owner.id}-${buttonType}`;
+export const getButtonId = (lobby: Lobby, ButtonName: ButtonName) => `${lobby.owner.id}-${ButtonName}`;
 export const parseButtonId = (customId: string) => ({
     ownerId: customId.split("-")[0],
-    buttonType: customId.split("-")[1] as ButtonType,
+    ButtonName: customId.split("-")[1] as ButtonName,
 });
 
 export const getLobbyButtons = (lobby: Lobby) =>
     new ActionRowBuilder<ButtonBuilder>().addComponents(
         new ButtonBuilder()
-            .setCustomId(getButtonId(lobby, ButtonType.Join))
+            .setCustomId(getButtonId(lobby, ButtonName.Join))
             .setLabel("Join")
             .setStyle(ButtonStyle.Danger)
             .setDisabled(lobby.state === LobbyState.Playing || lobby.isFull()),
         new ButtonBuilder()
-            .setCustomId(getButtonId(lobby, ButtonType.Leave))
+            .setCustomId(getButtonId(lobby, ButtonName.Leave))
             .setLabel("Leave")
             .setStyle(ButtonStyle.Secondary)
             .setDisabled(lobby.state === LobbyState.Playing)

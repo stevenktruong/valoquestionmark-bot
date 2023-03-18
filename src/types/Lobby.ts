@@ -183,9 +183,9 @@ export class Lobby {
                 }
 
                 const client: ValoQuestionMarkClient = i.client as ValoQuestionMarkClient;
-                const { buttonType } = parseButtonId(i.customId);
+                const { ButtonName } = parseButtonId(i.customId);
 
-                const handler = client.buttons.get(buttonType);
+                const handler = client.buttons.get(ButtonName);
                 try {
                     handler(i);
                 } catch (error) {

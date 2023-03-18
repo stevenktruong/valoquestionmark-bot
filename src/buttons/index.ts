@@ -5,7 +5,7 @@ import { ButtonHandler } from "types/ValoQuestionMarkClient";
 import { handleJoin } from "./join";
 import { handleLeave } from "./leave";
 
-export enum ButtonType {
+export enum ButtonName {
     Join = "Join",
     Leave = "Leave",
 
@@ -17,8 +17,8 @@ export enum ButtonType {
     Finished = "Finished",
 }
 
-const buttons = new Collection<ButtonType, ButtonHandler>();
-buttons.set(ButtonType.Join, handleJoin);
-buttons.set(ButtonType.Leave, handleLeave);
+const buttons = new Collection<ButtonName, ButtonHandler>();
+buttons.set(ButtonName.Join, handleJoin);
+buttons.set(ButtonName.Leave, handleLeave);
 
 export default buttons;
