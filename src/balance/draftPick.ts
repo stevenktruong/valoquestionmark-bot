@@ -92,6 +92,7 @@ export const handleDraftPick = async (interaction: ChatInputCommandInteraction) 
                 content: `Current picker: ${currentCaptain.displayName}`,
                 components: [selector],
             });
+            lobby.addBalanceMessage(message);
 
             const draftCollector = message.createMessageComponentCollector({
                 componentType: ComponentType.StringSelect,

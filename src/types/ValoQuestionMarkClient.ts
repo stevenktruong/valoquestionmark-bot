@@ -16,7 +16,7 @@ import { ButtonName } from "buttons";
 import { CommandName } from "commands";
 import logger from "logger";
 
-import { Lobby } from "./Lobby";
+import { Lobby, LobbyState } from "./Lobby";
 
 export class ValoQuestionMarkClient extends Client {
     private _commands: Collection<CommandName, CommandHandler>;
@@ -39,6 +39,19 @@ export class ValoQuestionMarkClient extends Client {
         this._lobbies = new Collection();
 
         this._logger = logger;
+
+        // Every minute, delete lobbies that haven't been touched in over 2 hours
+        setInterval(() => {
+            const now = new Date();
+            const expiredLobbies = this._lobbies
+                .filter(lobby => lobby.state == LobbyState.Waiting || lobby.state == LobbyState.Balanced)
+                .filter(lobby => new Date(lobby.lastUpdated.getTime() + 2 * 60 * 60 * 1000) < now);
+
+            expiredLobbies.forEach(async lobby => {
+                this._lobbies.delete(lobby.owner.id);
+                await lobby.destroy();
+            });
+        }, 60 * 1000);
     }
 
     public get commands() {

@@ -60,6 +60,7 @@ export class Lobby {
     public readonly channel: GuildTextBasedChannel;
 
     private _state: LobbyState;
+    private _lastUpdated: Date;
     private _channelIds: Snowflake[];
 
     private _players: GuildMemberCollection;
@@ -67,6 +68,7 @@ export class Lobby {
     private _teamB: Team;
 
     private _message: Message; // Main message representing the lobby status
+    private _balanceMessages: Message[]; // E.g., messages from draft picking
     private _balanceCollectors: InteractionCollector<any>[]; // Collectors related to team balancing
 
     // Channels created for the lobby
@@ -86,10 +88,12 @@ export class Lobby {
         this.guild = guild;
         this.channel = channel;
         this._state = LobbyState.Waiting;
+        this._lastUpdated = new Date();
         this._channelIds = [];
         this._players = new Collection();
         this._teamA = new Team();
         this._teamB = new Team();
+        this._balanceMessages = [];
         this._balanceCollectors = [];
         this._logger = client.logger.child({
             guild: guild.name,
@@ -99,6 +103,9 @@ export class Lobby {
     }
 
     public async destroy() {
+        // TODO: Automatically destroy after some time
+
+        await Promise.all(this._balanceMessages.filter(message => message.deletable).map(message => message.delete()));
         this._balanceCollectors.map(collector => collector.stop());
         if (this._message) await this._message.delete();
         if (this._channelB) await this._channelB.delete();
@@ -148,6 +155,8 @@ export class Lobby {
     }
 
     public async update() {
+        this._lastUpdated = new Date();
+
         const embed = getLobbyStatus(this);
         const lobbyButtons = getLobbyButtons(this);
         if (this._message) {
@@ -202,6 +211,10 @@ export class Lobby {
         return this._state;
     }
 
+    public get lastUpdated(): Date {
+        return this._lastUpdated;
+    }
+
     public get channelIds(): Snowflake[] {
         return this._channelIds;
     }
@@ -220,6 +233,10 @@ export class Lobby {
 
     public get size(): number {
         return this._players.size;
+    }
+
+    public addBalanceMessage(message: Message) {
+        this._balanceMessages.push(message);
     }
 
     public addBalanceCollector(collector: InteractionCollector<any>) {
