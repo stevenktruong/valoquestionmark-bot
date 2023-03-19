@@ -341,7 +341,11 @@ export class Lobby {
 
         this._teamA = new Team(new Collection(teamAPlayers.map(player => [player.id, player])), teamACaptain);
         this._teamB = new Team(new Collection(teamBPlayers.map(player => [player.id, player])), teamBCaptain);
-        this._state = LobbyState.Balanced;
+
+        if (this._teamA.size == MAX_TEAM_SIZE && this._teamB.size == MAX_TEAM_SIZE) {
+            this._balanceMessages = [];
+            this._state = LobbyState.Balanced;
+        }
 
         return true;
     }
