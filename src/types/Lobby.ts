@@ -24,6 +24,7 @@ export enum LobbyState {
     Waiting = "Waiting", // Before teams have been made
     Balanced = "Balanced", // After teams have been made
     Playing = "Playing", // Game has started
+    Archived = "Archived", // Lobby is done playing
 }
 
 export enum TeamLabel {
@@ -105,6 +106,16 @@ export class Lobby {
         if (this._channelB) await this._channelB.delete();
         if (this._channelA) await this._channelA.delete();
         if (this._category) await this._category.delete();
+    }
+
+    public async archive() {
+        await Promise.all(this._balanceMessages.filter(message => message.deletable).map(message => message.delete()));
+        this._balanceCollectors.map(collector => collector.stop());
+        // if (this._message) await this._message.delete();
+        if (this._channelB) await this._channelB.delete();
+        if (this._channelA) await this._channelA.delete();
+        if (this._category) await this._category.delete();
+        this._state = LobbyState.Archived;
     }
 
     public async start() {

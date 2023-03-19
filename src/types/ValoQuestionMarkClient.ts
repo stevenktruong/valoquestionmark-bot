@@ -81,8 +81,10 @@ export class ValoQuestionMarkClient extends Client {
         return true;
     }
 
-    public archiveLobby(lobby: Lobby): boolean {
+    public async archiveLobby(lobby: Lobby): Promise<boolean> {
         // Remove reference to lobby WITHOUT destroying it, i.e., without removing the Discord message
+        await lobby.archive();
+        await lobby.update();
         return this.lobbies.delete(lobby.owner.id);
     }
 

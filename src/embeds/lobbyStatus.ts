@@ -16,10 +16,14 @@ export const getLobbyStatus = (lobby: Lobby) => {
         })
         .setDescription(
             (() => {
-                if (lobby.state !== LobbyState.Playing) {
-                    return lobby.isFull() ? "Lobby is full." : "Click `Join` to join the lobby.";
-                } else {
+                if (lobby.state === LobbyState.Playing) {
                     return "Lobby is in-game.";
+                } else if (lobby.state === LobbyState.Archived) {
+                    return `Lobby was archived on ${new Date().toLocaleString("en-us", {
+                        timeZone: "America/Los_Angeles",
+                    })}.`;
+                } else {
+                    return lobby.isFull() ? "Lobby is full." : "Click `Join` to join the lobby.";
                 }
             })()
         )
@@ -60,7 +64,7 @@ export const getLobbyStatus = (lobby: Lobby) => {
 };
 
 const teamField = (team: Team, name: string) => ({
-    name: "🗡️ Attackers",
+    name,
     value:
         team.players.size > 0
             ? team.players
