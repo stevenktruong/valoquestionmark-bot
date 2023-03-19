@@ -23,12 +23,6 @@ export const MAX_TEAM_SIZE = 5;
 export enum LobbyState {
     Waiting = "Waiting", // Before teams have been made
     Balanced = "Balanced", // After teams have been made
-
-    OwnerPicking = "OwnerPicking", // Lobby owner picks manually
-
-    PickingCaptains = "PickingCaptains", // Pick team captains for draft
-    Drafting = "Drafting", // Team captains pick
-
     Playing = "Playing", // Game has started
 }
 
