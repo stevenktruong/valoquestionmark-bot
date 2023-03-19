@@ -61,7 +61,7 @@ export default {
             return;
         }
 
-        lobby.resetBalancing();
+        await lobby.resetBalancing();
 
         const handler = client.balanceStrategies.get(balanceStrategy);
         try {

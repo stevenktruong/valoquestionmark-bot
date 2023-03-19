@@ -245,9 +245,13 @@ export class Lobby {
         });
     }
 
-    public resetBalancing() {
+    public async resetBalancing() {
+        await Promise.all(this._balanceMessages.filter(message => message.deletable).map(message => message.delete()));
+        this._balanceMessages = [];
+
         this._balanceCollectors.map(collector => collector.stop());
         this._balanceCollectors = [];
+
         this._state = LobbyState.Waiting;
     }
 
