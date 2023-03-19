@@ -12,7 +12,7 @@ const playerRanks = {
     [Player.Darwin]: 7,
     [Player.Josh]: 9,
     [Player.Lindsey]: 6,
-    [Player.Sequential]: 1,
+    // [Player.Sequential]: 1,
     [Player.Sophie]: 11,
     [Player.Steve]: 10,
     [Player.Steven]: 2,

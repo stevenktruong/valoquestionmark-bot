@@ -116,7 +116,8 @@ export const handleDraftPick = async (interaction: ChatInputCommandInteraction) 
                         collected.values.map(id => `- ${lobby.getPlayer(id).displayName}`).join("\n"),
                     components: [],
                 });
-                await collected.deleteReply();
+                lobby.removeBalanceMessage(message.id);
+                await message.delete();
 
                 draftCollector.stop();
             });

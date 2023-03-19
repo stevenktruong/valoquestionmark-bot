@@ -55,7 +55,7 @@ export default {
 
         if (lobby.state === LobbyState.Playing) {
             await interaction.reply({
-                content: "You can't balance teams while a game is in progress",
+                content: "You can't balance teams while a game is in progress!",
                 ephemeral: true,
             });
             return;

@@ -63,7 +63,7 @@ export class Lobby {
     private _teamB: Team;
 
     private _message: Message; // Main message representing the lobby status
-    private _balanceMessages: Message[]; // E.g., messages from draft picking
+    private _balanceMessages: Collection<Snowflake, Message>; // E.g., messages from draft picking
     private _balanceCollectors: InteractionCollector<any>[]; // Collectors related to team balancing
 
     // Channels created for the lobby
@@ -89,7 +89,7 @@ export class Lobby {
         this._players = new Collection();
         this._teamA = new Team();
         this._teamB = new Team();
-        this._balanceMessages = [];
+        this._balanceMessages = new Collection();
         this._balanceCollectors = [];
         this._logger = client.logger.child({
             guild: guild.name,
@@ -234,7 +234,11 @@ export class Lobby {
     }
 
     public addBalanceMessage(message: Message) {
-        this._balanceMessages.push(message);
+        this._balanceMessages.set(message.id, message);
+    }
+
+    public removeBalanceMessage(messageId: Snowflake) {
+        this._balanceMessages.delete(messageId);
     }
 
     public addBalanceCollector(collector: InteractionCollector<any>) {
@@ -247,7 +251,7 @@ export class Lobby {
 
     public async resetBalancing() {
         await Promise.all(this._balanceMessages.filter(message => message.deletable).map(message => message.delete()));
-        this._balanceMessages = [];
+        this._balanceMessages = new Collection();
 
         this._balanceCollectors.map(collector => collector.stop());
         this._balanceCollectors = [];
@@ -343,7 +347,7 @@ export class Lobby {
         this._teamB = new Team(new Collection(teamBPlayers.map(player => [player.id, player])), teamBCaptain);
 
         if (this._teamA.size == MAX_TEAM_SIZE && this._teamB.size == MAX_TEAM_SIZE) {
-            this._balanceMessages = [];
+            this._balanceMessages = new Collection();
             this._state = LobbyState.Balanced;
         }
 
