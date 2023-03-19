@@ -16,7 +16,7 @@ import { ButtonName } from "buttons";
 import { CommandName } from "commands";
 import logger from "logger";
 
-import { Lobby, LobbyState } from "./Lobby";
+import { Lobby } from "./Lobby";
 
 export class ValoQuestionMarkClient extends Client {
     private _commands: Collection<CommandName, CommandHandler>;
@@ -79,6 +79,11 @@ export class ValoQuestionMarkClient extends Client {
         if (this.lobbies.has(member.id)) return false;
         this.lobbies.set(member.id, lobby);
         return true;
+    }
+
+    public archiveLobby(lobby: Lobby): boolean {
+        // Remove reference to lobby WITHOUT destroying it, i.e., without removing the Discord message
+        return this.lobbies.delete(lobby.owner.id);
     }
 
     public async cleanup() {

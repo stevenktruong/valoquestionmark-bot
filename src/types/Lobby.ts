@@ -105,8 +105,6 @@ export class Lobby {
     }
 
     public async destroy() {
-        // TODO: Automatically destroy after some time
-
         await Promise.all(this._balanceMessages.filter(message => message.deletable).map(message => message.delete()));
         this._balanceCollectors.map(collector => collector.stop());
         if (this._message) await this._message.delete();

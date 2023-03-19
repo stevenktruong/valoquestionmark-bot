@@ -33,7 +33,10 @@ export default {
         const lobby = new Lobby(client, member, guild, channel);
 
         if (!client.newLobby(member, lobby)) {
-            await interaction.reply({ content: "You already created a lobby", ephemeral: true });
+            await interaction.reply({
+                content: "You already created a lobby. You can archive it with `/archive` or delete it with `/delete`.",
+                ephemeral: true,
+            });
             return;
         }
         lobby.addPlayer(member);

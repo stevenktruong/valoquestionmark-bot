@@ -3,6 +3,7 @@ import { Collection } from "discord.js";
 import { CommandHandler } from "types/ValoQuestionMarkClient";
 
 import add from "./add";
+import archive from "./archive";
 import balance from "./balance";
 import create from "./create";
 import dashboard from "./dashboard";
@@ -15,20 +16,22 @@ import swap from "./swap";
 
 export enum CommandName {
     Add = "add",
+    Archive = "archive",
     Balance = "balance",
     Create = "create",
+    Dashboard = "dashboard",
     Delete = "delete",
-    Remove = "remove",
     Refresh = "refresh",
+    Remove = "remove",
     Start = "start",
     Stop = "stop",
     Swap = "swap",
-    Dashboard = "dashboard",
 }
 
 const commands = new Collection<CommandName, CommandHandler>();
 commands.set(CommandName.Add, add);
 commands.set(CommandName.Balance, balance);
+commands.set(CommandName.Archive, archive);
 commands.set(CommandName.Create, create);
 commands.set(CommandName.Delete, _delete);
 commands.set(CommandName.Remove, remove);
