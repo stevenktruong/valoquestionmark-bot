@@ -167,7 +167,7 @@ export class Lobby {
         if (this._message) {
             await this._message.edit({
                 embeds: [embed],
-                components: [lobbyButtons],
+                components: this._state !== LobbyState.Archived ? [lobbyButtons] : [],
             });
         } else {
             this._message = await this.channel.send({
