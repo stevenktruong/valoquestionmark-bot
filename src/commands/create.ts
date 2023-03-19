@@ -45,7 +45,8 @@ export default {
             content:
                 "Successfully created a lobby! If you're not playing, you can leave by clicking the `Leave` button." +
                 "\n- Once everyone joins, run `/balance` to pick teams." +
-                "\n- You can manually add and remove players with `/add` and `/remove`, respectively.",
+                "\n- You can manually add and remove players with `/add` and `/remove`, respectively." +
+                "\n- When you're done, you can run `/archive` to keep the Discord message or `/delete` to delete it.",
             ephemeral: true,
         });
         await lobby.update();
