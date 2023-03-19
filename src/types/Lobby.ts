@@ -61,6 +61,7 @@ export class Lobby {
 
     private _state: LobbyState;
     private _lastUpdated: Date;
+    private _hasPlayed: boolean; // If a lobby has ever been started, we don't delete it
     private _channelIds: Snowflake[];
 
     private _players: GuildMemberCollection;
@@ -89,6 +90,7 @@ export class Lobby {
         this.channel = channel;
         this._state = LobbyState.Waiting;
         this._lastUpdated = new Date();
+        this._hasPlayed = false;
         this._channelIds = [];
         this._players = new Collection();
         this._teamA = new Team();
@@ -115,7 +117,6 @@ export class Lobby {
 
     public async start() {
         const { teamA, teamB } = this.teams;
-
         this._category = await this.guild.channels.create({
             name: `${this.owner.displayName}'s Customs`,
             type: ChannelType.GuildCategory,
@@ -134,6 +135,7 @@ export class Lobby {
         ]);
 
         this._state = LobbyState.Playing;
+        this._hasPlayed = true;
     }
 
     public async stop(channel: VoiceChannel) {
@@ -213,6 +215,10 @@ export class Lobby {
 
     public get lastUpdated(): Date {
         return this._lastUpdated;
+    }
+
+    public get hasPlayed(): boolean {
+        return this._hasPlayed;
     }
 
     public get channelIds(): Snowflake[] {

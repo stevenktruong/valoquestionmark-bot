@@ -44,7 +44,8 @@ export class ValoQuestionMarkClient extends Client {
         setInterval(() => {
             const now = new Date();
             const expiredLobbies = this._lobbies
-                .filter(lobby => lobby.state == LobbyState.Waiting || lobby.state == LobbyState.Balanced)
+                // .filter(lobby => lobby.state == LobbyState.Waiting || lobby.state == LobbyState.Balanced)
+                .filter(lobby => !lobby.hasPlayed)
                 .filter(lobby => new Date(lobby.lastUpdated.getTime() + 2 * 60 * 60 * 1000) < now);
 
             expiredLobbies.forEach(async lobby => {
