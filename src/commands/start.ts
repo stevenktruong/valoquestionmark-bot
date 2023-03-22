@@ -21,7 +21,7 @@ export default {
 
         await interaction.deferReply({ ephemeral: true });
         await lobby.start();
-        await interaction.reply({
+        await interaction.followUp({
             content:
                 "Started the lobby successfully! Run `/stop` once you're done to move everyone back to one channel.",
             ephemeral: true,
