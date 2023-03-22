@@ -19,6 +19,7 @@ export default {
             return;
         }
 
+        await interaction.deferReply({ ephemeral: true });
         await lobby.start();
         await interaction.reply({
             content:
