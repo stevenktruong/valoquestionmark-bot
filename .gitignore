@@ -1,12 +1,12 @@
 .DS_Store
 node_modules
 dist
+data/*
 
 # Python-related files
 __pycache__
 env
 models/*
-
 
 # Contains sensitive data (i.e., API token)
 .env
