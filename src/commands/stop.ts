@@ -45,9 +45,8 @@ export default {
 
         await interaction.deferReply({ ephemeral: true });
         await lobby.stop(channel as VoiceChannel);
-        await interaction.followUp({
+        await interaction.editReply({
             content: "Stopped the lobby successfully!",
-            ephemeral: true,
         });
 
         await lobby.update();

@@ -18,7 +18,7 @@ CADE = "cade"
 DARWIN = "darwin"
 JOSH = "josh"
 LINDSEY = "lindsey"
-SEQUENTIAL = "sequential"
+# SEQUENTIAL = "sequential"
 SOPHIE = "sophie"
 STEVE = "steve"
 STEVEN = "steven"
@@ -36,7 +36,7 @@ PLAYER_NAMES = [
     DARWIN,
     JOSH,
     LINDSEY,
-    SEQUENTIAL,
+    # SEQUENTIAL,
     SOPHIE,
     STEVE,
     STEVEN,
