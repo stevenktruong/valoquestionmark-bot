@@ -13,6 +13,7 @@ SCORE = "score"
 # Player names
 ANDY = "andy"
 BRANDON = "brandon"
+BREE = "bree"
 BRIAN = "brian"
 CADE = "cade"
 DARWIN = "darwin"
@@ -31,6 +32,7 @@ YANG = "yang"
 PLAYER_NAMES = [
     ANDY,
     BRANDON,
+    BREE,
     BRIAN,
     CADE,
     DARWIN,
