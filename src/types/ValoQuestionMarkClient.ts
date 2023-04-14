@@ -99,6 +99,6 @@ export interface CommandHandler {
     autocomplete?: (interaction: AutocompleteInteraction) => unknown;
 }
 
-export type ButtonHandler = (interaction: ButtonInteraction) => unknown;
+export type ButtonHandler = (interaction: ButtonInteraction) => Promise<unknown>;
 
-export type BalanceStrategyHandler = (interaction: ChatInputCommandInteraction) => unknown;
+export type BalanceStrategyHandler = (interaction: ChatInputCommandInteraction) => Promise<unknown>;

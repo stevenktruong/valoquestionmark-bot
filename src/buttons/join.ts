@@ -16,7 +16,7 @@ export const handleJoin = async (interaction: ButtonInteraction) => {
             await interaction.reply({ content: "This lobby is full", ephemeral: true });
             return;
         }
-        lobby.addPlayer(member);
+        await lobby.addPlayer(member);
 
         // Dummy users for testing
         if (ownerId === "120048657679646720" && lobby.guild.id === "811846013656367174") {
@@ -32,7 +32,7 @@ export const handleJoin = async (interaction: ButtonInteraction) => {
                         } as GuildMember)
                 );
             for (const dummy of dummies) {
-                lobby.addPlayer(dummy);
+                await lobby.addPlayer(dummy);
             }
         }
     }

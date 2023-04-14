@@ -39,7 +39,7 @@ export const getLobbyStatus = (lobby: Lobby) => {
                         name: `👥 Players (${lobby.size}/${MAX_LOBBY_SIZE})`,
                         value: lobby.size > 0 ? lobby.players.map(member => member.displayName).join("\n") : "\u200b",
                     });
-                } else if (teamA.size + teamB.size < MAX_LOBBY_SIZE) {
+                } else if (teamA.size + teamB.size < lobby.size) {
                     fields.push({
                         name: "👥 Remaining Players",
                         value:

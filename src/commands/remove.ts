@@ -27,7 +27,7 @@ export default {
             return;
         }
 
-        lobby.removePlayer(player);
+        await lobby.removePlayer(player);
         await interaction.reply({
             content: `Kicked <@${player.id}> from the lobby.`,
             ephemeral: true,

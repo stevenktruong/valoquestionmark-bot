@@ -10,7 +10,7 @@ export const handleLeave = async (interaction: ButtonInteraction) => {
     const lobby = client.lobbies.get(ownerId);
 
     if (lobby.hasPlayer(member)) {
-        lobby.removePlayer(member);
+        await lobby.removePlayer(member);
     }
     await interaction.deferUpdate();
 };

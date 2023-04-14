@@ -39,7 +39,7 @@ export default {
             });
             return;
         }
-        lobby.addPlayer(member);
+        await lobby.addPlayer(member);
 
         await interaction.reply({
             content:

@@ -201,7 +201,7 @@ export class Lobby {
 
                 const handler = client.buttons.get(ButtonName);
                 try {
-                    handler(i);
+                    await handler(i);
                 } catch (error) {
                     this._logger.error(error);
                     await i.reply({ content: "There was an error while handling this button!", ephemeral: true });
@@ -261,6 +261,8 @@ export class Lobby {
     }
 
     public async resetBalancing() {
+        this.resetTeams();
+
         await Promise.all(this._balanceMessages.filter(message => message.deletable).map(message => message.delete()));
         this._balanceMessages = new Collection();
 
@@ -283,7 +285,7 @@ export class Lobby {
         return this._players.has(member.id);
     }
 
-    public addPlayer(member: GuildMember): void {
+    public async addPlayer(member: GuildMember) {
         if (this._players.has(member.id)) {
             this._logger.warn(
                 {
@@ -296,14 +298,14 @@ export class Lobby {
             );
             return;
         }
-        this.resetBalancing();
+        await this.resetBalancing();
         this._players.set(member.id, member);
         this._state = LobbyState.Waiting;
     }
 
-    public removePlayer(member: GuildMember): void {
+    public async removePlayer(member: GuildMember) {
         if (this._players.has(member.id)) {
-            this.resetBalancing();
+            await this.resetBalancing();
             this._players.delete(member.id);
             this._state = LobbyState.Waiting;
         } else {
