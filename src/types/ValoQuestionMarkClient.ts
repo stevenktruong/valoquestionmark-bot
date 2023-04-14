@@ -43,15 +43,24 @@ export class ValoQuestionMarkClient extends Client {
         // Every minute, delete lobbies that haven't been touched in over 2 hours
         setInterval(() => {
             const now = new Date();
-            const expiredLobbies = this._lobbies
+            const expiredLobbies = this._lobbies.filter(
+                lobby => new Date(lobby.lastUpdated.getTime() + 2 * 60 * 60 * 1000) < now
+            );
+
+            // Delete expired lobbies that have never played
+            expiredLobbies
                 // .filter(lobby => lobby.state == LobbyState.Waiting || lobby.state == LobbyState.Balanced)
                 .filter(lobby => !lobby.hasPlayed)
-                .filter(lobby => new Date(lobby.lastUpdated.getTime() + 2 * 60 * 60 * 1000) < now);
+                .forEach(async lobby => {
+                    await this.deleteLobby(lobby);
+                });
 
-            expiredLobbies.forEach(async lobby => {
-                this._lobbies.delete(lobby.owner.id);
-                await lobby.destroy();
-            });
+            // Archive expired lobbies that have played at least once
+            expiredLobbies
+                .filter(lobby => lobby.hasPlayed)
+                .forEach(async lobby => {
+                    await this.archiveLobby(lobby);
+                });
         }, 60 * 1000);
     }
 
@@ -79,6 +88,11 @@ export class ValoQuestionMarkClient extends Client {
         if (this.lobbies.has(member.id)) return false;
         this.lobbies.set(member.id, lobby);
         return true;
+    }
+
+    public async deleteLobby(lobby: Lobby): Promise<boolean> {
+        await lobby.destroy();
+        return this._lobbies.delete(lobby.owner.id);
     }
 
     public async archiveLobby(lobby: Lobby): Promise<boolean> {
